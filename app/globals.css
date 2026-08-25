@@ -1,0 +1,75 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  min-height: 100%;
+  width: 100%;
+  overflow-x: clip;
+}
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Venomous Black Mercury Side Accents */
+.venom-mercury-side-left {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 65px;
+  background: linear-gradient(
+    90deg,
+    #000000 0%,
+    rgba(9, 9, 11, 0.95) 45%,
+    rgba(24, 24, 27, 0.35) 75%,
+    transparent 100%
+  );
+  box-shadow: inset 4px 0 20px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 50;
+}
+
+.venom-mercury-side-right {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 65px;
+  background: linear-gradient(
+    270deg,
+    #000000 0%,
+    rgba(9, 9, 11, 0.95) 45%,
+    rgba(24, 24, 27, 0.35) 75%,
+    transparent 100%
+  );
+  box-shadow: inset -4px 0 20px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 50;
+}
+
+@media (max-width: 768px) {
+  .venom-mercury-side-left,
+  .venom-mercury-side-right {
+    width: 25px;
+  }
+}

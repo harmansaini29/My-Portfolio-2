@@ -1,0 +1,362 @@
+/* ==========================================================================
+   AvatarHUDOverlay — Scroll-Driven Rise + SVG Leader Lines + Glass Cards
+   ========================================================================== */
+
+.hud-overlay-root {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 4.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── HUD Cards Column on the Left (48%) ──────────────────────────────────── */
+.hud-cards-col-left {
+  flex: 0 0 48%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+
+/* ── Avatar Column on the Right (46%) ────────────────────────────────────── */
+.hud-avatar-col-right {
+  flex: 0 0 44%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+
+.hud-avatar-frame {
+  position: relative;
+  width: min(300px, 38vw);
+  aspect-ratio: 3 / 4;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+}
+
+.hud-avatar-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid rgba(99, 102, 241, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.2),
+    0 0 35px rgba(99, 102, 241, 0.35),
+    inset 0 0 45px rgba(0, 0, 0, 0.6);
+  z-index: 3;
+  pointer-events: none;
+  animation: hudRimPulse 3.6s ease-in-out infinite;
+}
+
+@keyframes hudRimPulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2), 0 0 35px rgba(99, 102, 241, 0.35), inset 0 0 45px rgba(0, 0, 0, 0.6); }
+  50% { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.4), 0 0 55px rgba(99, 102, 241, 0.55), inset 0 0 45px rgba(0, 0, 0, 0.5); }
+}
+
+.hud-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hud-avatar-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.08) 3px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+}
+
+.hud-avatar-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(10, 10, 18, 0.85);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 8px;
+  padding: 4px 12px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  white-space: nowrap;
+}
+
+.hud-avatar-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: dotPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.hud-avatar-badge-text {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+}
+
+/* ── Stats Row ────────────────────────────────────────────────────────────── */
+.hud-stats-row {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+}
+
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.hud-stat-value {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.hud-stat-label {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+}
+
+/* ── HUD Card ─────────────────────────────────────────────────────────────── */
+.hud-card {
+  position: relative;
+  background: rgba(8, 8, 16, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hud-card:hover {
+  border-color: color-mix(in srgb, var(--card-accent, #6366f1) 40%, transparent);
+  box-shadow:
+    0 4px 28px rgba(0, 0, 0, 0.6),
+    0 0 20px color-mix(in srgb, var(--card-accent, #6366f1) 15%, transparent);
+}
+
+.hud-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+  position: relative;
+}
+
+.hud-card-accent-bar {
+  width: 3px;
+  height: 20px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.hud-card-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hud-card-title {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.hud-card-tag {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.hud-card-corner-bracket {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-top: 1.5px solid;
+  border-right: 1.5px solid;
+  border-radius: 0 3px 0 0;
+}
+
+/* ── Bio Card ─────────────────────────────────────────────────────────────── */
+.hud-bio-name {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.hud-bio-role {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.6rem;
+}
+
+.hud-bio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 0.75rem;
+}
+
+.hud-bio-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hud-bio-label {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 0.46rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+}
+
+.hud-bio-value {
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.hud-status-active {
+  color: #10b981 !important;
+}
+
+/* ── Tech Badges ─────────────────────────────────────────────────────────── */
+.hud-tech-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.hud-tech-badge {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: var(--badge-color, #ffffff);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in srgb, var(--badge-color, #ffffff) 30%, transparent);
+  border-radius: 6px;
+  padding: 2.5px 7.5px;
+}
+
+/* ── Engineering List ────────────────────────────────────────────────────── */
+.hud-eng-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hud-eng-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.45;
+}
+
+.hud-eng-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* ── Leader SVG ──────────────────────────────────────────────────────────── */
+.hud-leader-svg {
+  pointer-events: none;
+  z-index: 5;
+}
+
+.hud-pulse-dot {
+  animation: pulseDot 1.6s ease-in-out infinite;
+}
+
+/* ── Responsive Stack for Mobile ─────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .hud-overlay-root {
+    flex-direction: column-reverse;
+    padding: 1.5rem 1.25rem;
+    gap: 1.5rem;
+    overflow-y: auto;
+    justify-content: flex-start;
+  }
+
+  .hud-cards-col-left,
+  .hud-avatar-col-right {
+    flex: none;
+    width: 100%;
+  }
+
+  .hud-avatar-frame {
+    width: min(200px, 50vw);
+  }
+
+  .hud-card {
+    padding: 0.85rem 1rem;
+  }
+}

@@ -1,0 +1,133 @@
+/* components/DiceRoleFlipper.css */
+.dice-flipper-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1.15rem;
+  pointer-events: auto;
+  user-select: none;
+  perspective: 1000px;
+}
+
+.dice-flipper-neon-glow {
+  position: absolute;
+  inset: -6px -12px;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(148, 163, 184, 0.08) 50%,
+    transparent 75%
+  );
+  border-radius: 16px;
+  filter: blur(10px);
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.4s ease;
+}
+
+.dice-flipper-container:hover .dice-flipper-neon-glow {
+  opacity: 1;
+}
+
+.dice-flipper-box {
+  position: relative;
+  height: 48px;
+  min-width: 280px;
+  padding: 0 1.25rem;
+  background: rgba(12, 12, 20, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transform-style: preserve-3d;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  z-index: 1;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+  overflow: hidden;
+}
+
+.dice-flipper-box.glowing {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.dice-bracket {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dice-bracket-tl {
+  top: 4px;
+  left: 6px;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-left: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 2px 0 0 0;
+}
+
+.dice-bracket-br {
+  bottom: 4px;
+  right: 6px;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-right: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 0 0 2px 0;
+}
+
+.dice-flipper-cube {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transform: translateZ(-24px) rotateX(0deg);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dice-flipper-cube.flipping-exit {
+  transform: translateZ(-24px) rotateX(90deg);
+}
+
+.dice-flipper-cube.flipping-enter {
+  transform: translateZ(-24px) rotateX(0deg);
+}
+
+.dice-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  white-space: nowrap;
+}
+
+.dice-face-front {
+  transform: rotateX(0deg) translateZ(24px);
+}
+
+.dice-face-bottom {
+  transform: rotateX(-90deg) translateZ(24px);
+}
+
+.dice-role-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+.dice-role-text {
+  font-family: var(--font-jakarta), -apple-system, sans-serif;
+  font-size: 0.94rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 55%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
