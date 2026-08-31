@@ -1,7 +1,4 @@
-/* ==========================================================================
-   Journey3DSection.css — 3D Milestones & Branching Tree Spine (No Cards)
-   ========================================================================== */
-
+/* components/Journey3DSection.css */
 .j3d-track {
   position: relative !important;
   width: 100%;
@@ -46,7 +43,6 @@
   z-index: 1;
 }
 
-/* ── Central Growing Branching Tree ──────────────────────────────────────── */
 .j3d-tree-container {
   position: absolute;
   inset: 0;
@@ -89,7 +85,6 @@
   height: 80%;
 }
 
-/* ── Milestone Information Docks (No Card Boxes) ────────────────────────── */
 .j3d-dock {
   position: absolute;
   top: 50%;
@@ -124,7 +119,7 @@
 }
 
 .j3d-title {
-  font-family: var(--font-jakarta), sans-serif;
+  font-family: var(--font-jakarta), -apple-system, sans-serif;
   font-size: clamp(1.5rem, 2.3vw, 2.2rem);
   font-weight: 800;
   letter-spacing: -0.02em;

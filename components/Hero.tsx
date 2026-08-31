@@ -248,7 +248,7 @@ export default function LiquidRevealHero({
       />
       <div className="glow" id="glow" ref={glowRef} />
 
-      {/* Top Status Telemetry */}
+      {/* Perimeter Telemetry */}
       <div className="hero-telemetry-left" aria-hidden>
         <div className="hero-telemetry-line" />
         <span className="hero-telemetry-text">LAT 28°38&apos; N // 120 FPS WebGL</span>
@@ -280,7 +280,7 @@ export default function LiquidRevealHero({
         </div>
       </div>
 
-      {/* Bottom Left: Silver-Embroidered Metallic Identity */}
+      {/* Bottom Left Identity Section */}
       <div className="bottom-left-section" ref={bottomLeftRef}>
         <div className="greeting-row">
           <span className="wave-hand">👋</span>
@@ -292,7 +292,7 @@ export default function LiquidRevealHero({
           <h1 className="hero-silver-title">{name}</h1>
         </div>
 
-        {/* 3D Dice Role Flipper */}
+        {/* 3D Perspective Dice Role Flipper */}
         <DiceRoleFlipper roles={ROLES} intervalMs={3000} />
       </div>
 

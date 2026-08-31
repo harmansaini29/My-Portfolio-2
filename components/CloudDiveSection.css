@@ -1,7 +1,4 @@
-/* ==========================================================================
-   CloudDiveSection.css — 3D Volumetric Cloud Fly-Through
-   ========================================================================== */
-
+/* components/CloudDiveSection.css */
 .cld-track {
   position: relative !important;
   width: 100%;
@@ -62,7 +59,7 @@
 }
 
 .cld-title {
-  font-family: var(--font-jakarta), sans-serif;
+  font-family: var(--font-jakarta), -apple-system, sans-serif;
   font-size: clamp(2rem, 3.8vw, 3.4rem);
   font-weight: 900;
   letter-spacing: -0.03em;

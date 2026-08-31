@@ -1,7 +1,4 @@
-/* ==========================================================================
-   ScrollJourney.css — Smooth Vortex Slide & Left About Me Narrative
-   ========================================================================== */
-
+/* components/ScrollJourney.css */
 .sj-track {
   position: relative !important;
   width: 100%;
@@ -49,13 +46,13 @@
   z-index: 1;
 }
 
-/* ── Left-docked About Me Paragraph ──────────────────────────────────────── */
+/* ── Elevated Upper-Middle Left Narrative Dock ────────────────────────────── */
 .sj-about-left {
   position: absolute;
-  left: clamp(2.5rem, 6vw, 6.5rem);
-  top: 50%;
-  transform: translateY(-50%);
-  max-width: min(42vw, 540px);
+  left: clamp(2.5rem, 7vw, 8rem);
+  top: 38%;
+  transform: translateY(-45%);
+  max-width: min(44vw, 560px);
   display: flex;
   flex-direction: column;
   gap: 0.95rem;
@@ -70,7 +67,8 @@
   gap: 8px;
   font-family: 'SF Mono', Menlo, monospace;
   font-size: 0.62rem;
-  letter-spacing: 0.18em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   color: rgba(226, 232, 240, 0.7);
   text-transform: uppercase;
 }
@@ -79,18 +77,18 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  background: #6366f1;
+  box-shadow: 0 0 10px #6366f1;
 }
 
 .sj-about-title {
-  font-family: var(--font-jakarta), sans-serif;
-  font-size: clamp(1.8rem, 2.8vw, 2.6rem);
+  font-family: var(--font-jakarta), -apple-system, sans-serif;
+  font-size: clamp(1.8rem, 2.8vw, 2.65rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.15;
   margin: 0;
-  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 45%, #94a3b8 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.9));
@@ -99,8 +97,8 @@
 .sj-about-desc {
   font-size: 0.92rem;
   line-height: 1.7;
-  color: rgba(203, 213, 225, 0.8);
-  margin: 0.15rem 0 0.5rem;
+  color: rgba(203, 213, 225, 0.82);
+  margin: 0.1rem 0 0.35rem;
 }
 
 .sj-about-tech-pills {
@@ -113,18 +111,23 @@
   font-family: 'SF Mono', Menlo, monospace;
   font-size: 0.58rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 3.5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 4px 11px;
   border-radius: 100px;
   letter-spacing: 0.04em;
+  transition: border-color 0.3s ease, background 0.3s ease;
 }
 
-/* ── Scroll Hint ─────────────────────────────────────────────────────────── */
+.sj-about-tech-pills span:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
 .sj-scroll-hint {
   position: absolute;
-  bottom: 2rem;
+  bottom: 2.2rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -140,7 +143,7 @@
   font-size: 0.58rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .sj-mouse-icon {
@@ -177,6 +180,6 @@
   .sj-about-left {
     max-width: 88vw;
     left: 6vw;
-    top: 55%;
+    top: 42%;
   }
 }

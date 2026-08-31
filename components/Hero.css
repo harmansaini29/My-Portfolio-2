@@ -1,7 +1,4 @@
-/* ==========================================================================
-   Hero.css — Liquid Cursor Reveal & Silver-Embroidered Typography
-   ========================================================================== */
-
+/* components/Hero.css */
 .hero, .hero * {
   margin: 0;
   padding: 0;
@@ -40,7 +37,6 @@
   pointer-events: none;
 }
 
-/* ── Perimeter Telemetry ─────────────────────────────────────────────────── */
 .hero-telemetry-left,
 .hero-telemetry-right {
   position: absolute;
@@ -82,7 +78,6 @@
   padding: 0.8rem 0;
 }
 
-/* ── Portrait Framing ────────────────────────────────────────────────────── */
 .hero img {
   position: absolute;
   inset: 0;
@@ -126,7 +121,6 @@
   transition: opacity 0.4s ease;
 }
 
-/* ── Top-Right Header Controls ─────────────────────────────────────────── */
 .top-right-controls {
   position: absolute;
   top: max(1.75rem, env(safe-area-inset-top, 1.75rem));
@@ -195,7 +189,6 @@
   transform: rotate(360deg);
 }
 
-/* ── Bottom-Left Identity Section (Silver Embroidery Typography) ───────── */
 .bottom-left-section {
   position: absolute;
   bottom: max(2.5rem, env(safe-area-inset-bottom, 2.5rem));

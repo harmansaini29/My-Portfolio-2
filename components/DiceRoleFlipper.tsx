@@ -32,7 +32,18 @@ export default function DiceRoleFlipper({
 }: DiceRoleFlipperProps) {
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<'idle' | 'exit' | 'enter'>('idle');
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
+
+  const addTimeout = (fn: () => void, ms: number) => {
+    const id = setTimeout(fn, ms);
+    timeoutIdsRef.current.push(id);
+    return id;
+  };
+
+  const clearAllTimeouts = () => {
+    timeoutIdsRef.current.forEach((id) => clearTimeout(id));
+    timeoutIdsRef.current = [];
+  };
 
   useEffect(() => {
     if (!roles || roles.length === 0) return;
@@ -40,11 +51,11 @@ export default function DiceRoleFlipper({
     const interval = setInterval(() => {
       setPhase('exit');
 
-      timerRef.current = setTimeout(() => {
+      addTimeout(() => {
         setIndex((prev) => (prev + 1) % roles.length);
         setPhase('enter');
 
-        setTimeout(() => {
+        addTimeout(() => {
           setPhase('idle');
         }, 340);
       }, 340);
@@ -52,7 +63,7 @@ export default function DiceRoleFlipper({
 
     return () => {
       clearInterval(interval);
-      if (timerRef.current) clearTimeout(timerRef.current);
+      clearAllTimeouts();
     };
   }, [roles, intervalMs]);
 

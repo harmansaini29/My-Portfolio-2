@@ -32,7 +32,6 @@ export default function Journey3DScene({ scrollProgress }: Journey3DSceneProps) 
         const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
         camera.position.set(0, 0, 10);
 
-        // ── Lighting Setup ──
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
         scene.add(ambientLight);
 
@@ -48,7 +47,7 @@ export default function Journey3DScene({ scrollProgress }: Journey3DSceneProps) 
         light3.position.set(0, 5, 2);
         scene.add(light3);
 
-        // ── Model 1: School (Mathematical Logic Octahedron Prism) on the Left ──
+        // ── Model 1: School (Mathematical Logic Octahedron) ──
         const schoolGroup = new THREE.Group();
         const octGeo = new THREE.OctahedronGeometry(1.5, 0);
         const octMat = new THREE.MeshStandardMaterial({
@@ -60,20 +59,20 @@ export default function Journey3DScene({ scrollProgress }: Journey3DSceneProps) 
         schoolGroup.add(octMesh);
 
         const octWire = new THREE.Mesh(
-            new THREE.OctahedronGeometry(1.8, 1),
-            new THREE.MeshBasicMaterial({ color: 0xa5b4fc, wireframe: true, transparent: true, opacity: 0.5 })
+            new THREE.OctahedronGeometry(1.85, 1),
+            new THREE.MeshBasicMaterial({ color: 0xa5b4fc, wireframe: true, transparent: true, opacity: 0.55 })
         );
         schoolGroup.add(octWire);
 
         const ring1 = new THREE.Mesh(
-            new THREE.TorusGeometry(2.2, 0.04, 16, 100),
+            new THREE.TorusGeometry(2.3, 0.04, 16, 100),
             new THREE.MeshBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.7 })
         );
         ring1.rotation.x = Math.PI / 3;
         schoolGroup.add(ring1);
         scene.add(schoolGroup);
 
-        // ── Model 2: College (Cyber Matrix Icosahedron Hypercube) on the Right ──
+        // ── Model 2: College (Cyber Matrix Icosahedron) ──
         const collegeGroup = new THREE.Group();
         const icoGeo = new THREE.IcosahedronGeometry(1.5, 0);
         const icoMat = new THREE.MeshStandardMaterial({
@@ -85,22 +84,22 @@ export default function Journey3DScene({ scrollProgress }: Journey3DSceneProps) 
         collegeGroup.add(icoMesh);
 
         const icoWire = new THREE.Mesh(
-            new THREE.IcosahedronGeometry(2.0, 1),
-            new THREE.MeshBasicMaterial({ color: 0x67e8f9, wireframe: true, transparent: true, opacity: 0.55 })
+            new THREE.IcosahedronGeometry(2.05, 1),
+            new THREE.MeshBasicMaterial({ color: 0x67e8f9, wireframe: true, transparent: true, opacity: 0.6 })
         );
         collegeGroup.add(icoWire);
 
         const ring2 = new THREE.Mesh(
-            new THREE.TorusGeometry(2.5, 0.05, 16, 100),
-            new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.7 })
+            new THREE.TorusGeometry(2.6, 0.05, 16, 100),
+            new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.75 })
         );
         ring2.rotation.y = Math.PI / 4;
         collegeGroup.add(ring2);
         scene.add(collegeGroup);
 
-        // ── Model 3: University (Quantum Distributed Torus Knot) on the Left ──
+        // ── Model 3: University (Quantum Distributed Torus Knot) ──
         const uniGroup = new THREE.Group();
-        const torusKnotGeo = new THREE.TorusKnotGeometry(1.15, 0.32, 128, 32, 2, 3);
+        const torusKnotGeo = new THREE.TorusKnotGeometry(1.2, 0.34, 128, 32, 2, 3);
         const torusKnotMat = new THREE.MeshStandardMaterial({
             color: 0x10b981,
             roughness: 0.2,
@@ -110,21 +109,21 @@ export default function Journey3DScene({ scrollProgress }: Journey3DSceneProps) 
         uniGroup.add(torusKnotMesh);
 
         const torusWire = new THREE.Mesh(
-            new THREE.TorusKnotGeometry(1.28, 0.36, 64, 16, 2, 3),
+            new THREE.TorusKnotGeometry(1.32, 0.38, 64, 16, 2, 3),
             new THREE.MeshBasicMaterial({ color: 0x6ee7b7, wireframe: true, transparent: true, opacity: 0.45 })
         );
         uniGroup.add(torusWire);
 
-        const particleCount = 100;
+        const particleCount = 120;
         const pGeo = new THREE.BufferGeometry();
         const pPos = new Float32Array(particleCount * 3);
         for (let i = 0; i < particleCount * 3; i += 3) {
-            pPos[i] = (Math.random() - 0.5) * 6;
-            pPos[i + 1] = (Math.random() - 0.5) * 6;
-            pPos[i + 2] = (Math.random() - 0.5) * 6;
+            pPos[i] = (Math.random() - 0.5) * 6.5;
+            pPos[i + 1] = (Math.random() - 0.5) * 6.5;
+            pPos[i + 2] = (Math.random() - 0.5) * 6.5;
         }
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        const pMat = new THREE.PointsMaterial({ size: 0.07, color: 0x34d399, transparent: true, opacity: 0.8 });
+        const pMat = new THREE.PointsMaterial({ size: 0.08, color: 0x34d399, transparent: true, opacity: 0.85 });
         const pMesh = new THREE.Points(pGeo, pMat);
         uniGroup.add(pMesh);
         scene.add(uniGroup);
@@ -149,7 +148,6 @@ export default function Journey3DScene({ scrollProgress }: Journey3DSceneProps) 
             const time = (performance.now() - startTime) / 1000;
             const progress = scrollProgress.get();
 
-            // Continuous 3D rotation
             octMesh.rotation.y = time * 0.6;
             octMesh.rotation.x = time * 0.4;
             octWire.rotation.y = -time * 0.3;
@@ -167,11 +165,12 @@ export default function Journey3DScene({ scrollProgress }: Journey3DSceneProps) 
 
             const isDesktop = width > 768;
 
-            // School: Active in range 0.05 to 0.36 (Positioned Left)
+            // School: Pop-in forward from Z = -8 to Z = 0
             const sT = 1 - Math.abs(progress - 0.20) / 0.15;
             const sScale = clamp(sT, 0, 1);
+            const sZ = (1 - clamp(progress / 0.20, 0, 1)) * -8;
             schoolGroup.scale.set(sScale, sScale, sScale);
-            schoolGroup.position.set(isDesktop ? -2.7 : 0, isDesktop ? 0 : 1.3, 0);
+            schoolGroup.position.set(isDesktop ? -2.7 : 0, isDesktop ? 0 : 1.3, sZ);
 
             // College: Active in range 0.38 to 0.69 (Positioned Right)
             const cT = 1 - Math.abs(progress - 0.53) / 0.15;

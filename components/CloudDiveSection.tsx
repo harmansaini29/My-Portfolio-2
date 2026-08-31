@@ -20,7 +20,6 @@ export default function CloudDiveSection() {
         restDelta: 0.001,
     });
 
-    // Typography header fading out as camera penetrates the cloud
     const titleOpacity = useTransform(smoothProgress, [0.08, 0.35], [1, 0]);
     const titleY = useTransform(smoothProgress, [0.08, 0.35], ['0px', '-60px']);
 
@@ -47,7 +46,6 @@ export default function CloudDiveSection() {
         const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
         camera.position.set(0, 0, 80);
 
-        // Procedural Soft Cloud Texture Generation
         const createCloudTexture = () => {
             const canvasEl = document.createElement('canvas');
             canvasEl.width = 128;
@@ -76,7 +74,6 @@ export default function CloudDiveSection() {
             blending: THREE.AdditiveBlending,
         });
 
-        // Generate Volumetric Cloud Bank
         const cloudCount = 140;
         const clouds: THREE.Mesh[] = [];
         const cloudGroup = new THREE.Group();
@@ -96,7 +93,6 @@ export default function CloudDiveSection() {
         }
         scene.add(cloudGroup);
 
-        // Ambient floating star dust inside the cloud bank
         const dustCount = 300;
         const dustGeo = new THREE.BufferGeometry();
         const dustPos = new Float32Array(dustCount * 3);
@@ -134,12 +130,10 @@ export default function CloudDiveSection() {
             const time = (performance.now() - startTime) / 1000;
             const progress = smoothProgress.get();
 
-            // Camera dives forward through the cloud bank on scroll
             camera.position.z = 80 - progress * 240;
             camera.position.x = Math.sin(time * 0.4) * 2.5;
             camera.position.y = Math.cos(time * 0.3) * 1.5;
 
-            // Gentle cloud billow rotation
             clouds.forEach((c, idx) => {
                 c.rotation.z += (idx % 2 === 0 ? 0.001 : -0.001);
             });
