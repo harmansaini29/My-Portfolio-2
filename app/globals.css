@@ -7,8 +7,8 @@
 * {
   box-sizing: border-box;
 }
-html,
-body {
+
+html, body {
   background-color: #000000 !important;
   color: #ffffff !important;
   margin: 0;
@@ -18,20 +18,43 @@ body {
   width: 100%;
   overflow-x: clip;
 }
+
+/* Continuous S-Road Moving GIF Animations */
+.road-moving-dashes {
+  animation: roadDashMove 1.8s linear infinite !important;
+}
+@keyframes roadDashMove {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -68; }
+}
+
+.road-photon-stream {
+  animation: roadPhotonMove 3.2s linear infinite !important;
+}
+@keyframes roadPhotonMove {
+  from { stroke-dashoffset: 1120; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Continuous 3D Cylinder Carousel Rotation */
+@keyframes cylinderRotate {
+  to { transform: rotateY(1turn); }
+}
+@keyframes ry {
+  to { transform: rotateY(1turn); }
+}
+
 /* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: #000000;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #27272a;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
 }

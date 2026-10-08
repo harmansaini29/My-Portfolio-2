@@ -2,14 +2,23 @@ import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Geist } from 'next/font/google';
 import './globals.css';
 import { cn } from "@/lib/utils";
+import SmoothScroll from '@/components/SmoothScroll';
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+  adjustFontFallback: true,
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+});
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-jakarta',
   weight: ['300', '400', '500', '600', '700', '800'],
   display: 'swap',
+  adjustFontFallback: true,
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
 });
 
 export const metadata: Metadata = {
@@ -24,8 +33,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("bg-black", "text-white", "antialiased", jakarta.variable, "font-sans", geist.variable)}>
-      <body className="min-h-screen bg-black overflow-x-hidden">{children}</body>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn("bg-black", "text-white", "antialiased", jakarta.variable, "font-sans", geist.variable)}
+    >
+      <body className="min-h-screen bg-black overflow-x-hidden" suppressHydrationWarning>
+        <SmoothScroll>
+          {children}
+        </SmoothScroll>
+      </body>
     </html>
   );
 }

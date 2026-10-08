@@ -73,7 +73,25 @@ export default function ParticleField() {
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
+    let isVisible = true;
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (!wasVisible && isVisible) {
+          lastTime = performance.now();
+          rafId = requestAnimationFrame(frame);
+        }
+      }, { threshold: 0.05 });
+      observer.observe(canvas);
+    }
+
     const frame = (now: number) => {
+      if (!isVisible) {
+        rafId = 0;
+        return;
+      }
       rafId = requestAnimationFrame(frame);
       const dt = Math.min(32, now - lastTime) / 16.67;
       lastTime = now;
@@ -114,7 +132,8 @@ export default function ParticleField() {
     rafId = requestAnimationFrame(frame);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      if (observer) observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', onMouseMove);
     };

@@ -2,7 +2,7 @@
 .sj-track {
   position: relative !important;
   width: 100%;
-  height: 280vh;
+  height: 360vh;
   background: #000000;
   margin: 0;
   padding: 0;
@@ -24,110 +24,157 @@
   isolation: isolate;
 }
 
-.sj-top-fade {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 160px;
-  background: linear-gradient(to bottom, #000000 0%, transparent 100%);
-  z-index: 15;
-  pointer-events: none;
-}
-
+/* Full-Screen WebGL Vortex: Unrestricted Dimensions, Clean Pull, No Shadows */
 .sj-vortex-layer {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  transform-origin: center center;
-  will-change: transform, opacity;
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 1;
 }
 
-/* ── Elevated Upper-Middle Left Narrative Dock ────────────────────────────── */
-.sj-about-left {
+/* Real-Time WebGL Sobel Edge & FBM Noise Dissolve Overlay */
+.sj-dissolve-layer {
   position: absolute;
-  left: clamp(2.5rem, 7vw, 8rem);
-  top: 38%;
-  transform: translateY(-45%);
-  max-width: min(44vw, 560px);
-  display: flex;
-  flex-direction: column;
-  gap: 0.95rem;
-  z-index: 10;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.sj-dissolve-hud {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  text-align: center;
+  z-index: 30;
+}
+
+/* Professional Typography Left & Right Flank Containers */
+.sj-about-container,
+.sj-right-container {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(38vw, 480px);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.sj-about-container {
+  left: clamp(1.5rem, 5.5vw, 7rem);
+}
+
+.sj-right-container {
+  right: clamp(1.5rem, 5.5vw, 7rem);
+}
+
+.sj-text-flow {
+  position: relative;
+  width: 100%;
   pointer-events: auto;
   will-change: transform, opacity;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
-.sj-eyebrow {
-  display: inline-flex;
+.sj-tag-row {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: 'SF Mono', Menlo, monospace;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: rgba(226, 232, 240, 0.7);
-  text-transform: uppercase;
+  gap: 0.5rem;
 }
 
-.sj-eyebrow-dot {
+.sj-pulse-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #6366f1;
-  box-shadow: 0 0 10px #6366f1;
+  flex-shrink: 0;
+}
+.sj-pulse-dot.cyan { background: #06b6d4; box-shadow: 0 0 8px #06b6d4; }
+.sj-pulse-dot.indigo { background: #818cf8; box-shadow: 0 0 8px #818cf8; }
+
+.sj-tag-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #94a3b8;
+  text-transform: uppercase;
 }
 
-.sj-about-title {
-  font-family: var(--font-jakarta), -apple-system, sans-serif;
-  font-size: clamp(1.8rem, 2.8vw, 2.65rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+.sj-heading {
+  font-size: clamp(1.8rem, 3.2vw, 2.75rem);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: #ffffff;
   margin: 0;
-  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.9));
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.9);
 }
 
-.sj-about-desc {
-  font-size: 0.92rem;
-  line-height: 1.7;
-  color: rgba(203, 213, 225, 0.82);
-  margin: 0.1rem 0 0.35rem;
+.sj-subheading {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
 }
 
-.sj-about-tech-pills {
+.sj-paragraph {
+  font-size: clamp(0.78rem, 1.1vw, 0.88rem);
+  line-height: 1.65;
+  color: rgba(226, 232, 240, 0.88);
+  font-weight: 400;
+}
+
+.sj-tech-pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
 }
 
-.sj-about-tech-pills span {
-  font-family: 'SF Mono', Menlo, monospace;
+.sj-tech-pill {
+  font-family: var(--font-mono, monospace);
   font-size: 0.58rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  padding: 3px 8px;
+  border-radius: 9999px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  padding: 4px 11px;
-  border-radius: 100px;
-  letter-spacing: 0.04em;
-  transition: border-color 0.3s ease, background 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(8px);
 }
 
-.sj-about-tech-pills span:hover {
-  background: rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.5);
+.sj-metrics-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
 }
 
+.sj-metric-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.62rem;
+  color: #cbd5e1;
+}
+
+/* Scroll Hint */
 .sj-scroll-hint {
   position: absolute;
-  bottom: 2.2rem;
+  bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -139,7 +186,7 @@
 }
 
 .sj-scroll-hint span {
-  font-family: 'SF Mono', Menlo, monospace;
+  font-family: var(--font-mono, monospace);
   font-size: 0.58rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -176,10 +223,12 @@
   61%, 100% { transform: translateY(0); opacity: 0; }
 }
 
-@media (max-width: 860px) {
-  .sj-about-left {
-    max-width: 88vw;
-    left: 6vw;
-    top: 42%;
+@media (max-width: 960px) {
+  .sj-about-container,
+  .sj-right-container {
+    width: min(92vw, 460px);
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
   }
 }

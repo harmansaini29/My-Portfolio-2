@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Required: three.js / R3F / drei are ESM-only packages
-  transpilePackages: ['three', '@react-three/fiber', '@react-three/drei'],
+  // Required: three.js is an ESM-only package
+  transpilePackages: ['three'],
 };
 
 module.exports = nextConfig;

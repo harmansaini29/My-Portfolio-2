@@ -31,11 +31,14 @@ export default function DiceRoleFlipper({
   className = '',
 }: DiceRoleFlipperProps) {
   const [index, setIndex] = useState(0);
-  const [phase, setPhase] = useState<'idle' | 'exit' | 'enter'>('idle');
+  const [phase, setPhase] = useState<'idle' | 'exit' | 'reset'>('idle');
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
   const addTimeout = (fn: () => void, ms: number) => {
-    const id = setTimeout(fn, ms);
+    const id = setTimeout(() => {
+      timeoutIdsRef.current = timeoutIdsRef.current.filter((t) => t !== id);
+      fn();
+    }, ms);
     timeoutIdsRef.current.push(id);
     return id;
   };
@@ -52,13 +55,15 @@ export default function DiceRoleFlipper({
       setPhase('exit');
 
       addTimeout(() => {
+        // Roll forward 90deg is complete: swap text and reset rotation without animation
         setIndex((prev) => (prev + 1) % roles.length);
-        setPhase('enter');
+        setPhase('reset');
 
+        // On next tick, re-arm for the next tumble
         addTimeout(() => {
           setPhase('idle');
-        }, 340);
-      }, 340);
+        }, 50);
+      }, 360);
     }, intervalMs);
 
     return () => {

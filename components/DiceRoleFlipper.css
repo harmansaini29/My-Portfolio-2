@@ -91,8 +91,9 @@
   transform: translateZ(-24px) rotateX(90deg);
 }
 
-.dice-flipper-cube.flipping-enter {
+.dice-flipper-cube.flipping-reset {
   transform: translateZ(-24px) rotateX(0deg);
+  transition: none !important;
 }
 
 .dice-face {

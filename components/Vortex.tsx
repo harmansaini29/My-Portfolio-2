@@ -356,6 +356,7 @@ function createVortex(
     canvas.style.display = "block";
     canvas.style.width = "100%";
     canvas.style.height = "100%";
+    canvas.className = "vortex-webgl-canvas";
     container.appendChild(canvas);
 
     let renderer: THREE.WebGLRenderer;
@@ -365,6 +366,7 @@ function createVortex(
             antialias: true,
             alpha: true,
             powerPreference: "high-performance",
+            preserveDrawingBuffer: true,
         });
     } catch {
         try {
@@ -372,6 +374,7 @@ function createVortex(
                 canvas,
                 antialias: false,
                 alpha: true,
+                preserveDrawingBuffer: true,
             });
         } catch (e2) {
             console.warn("[Vortex] WebGL creation failed:", e2);
@@ -1227,6 +1230,10 @@ export interface VortexProps {
     repel?: boolean;
     repelOptions?: Partial<typeof DEFAULTS.repelOptions>;
     style?: React.CSSProperties;
+    className?: string;
+    intensity?: number;
+    glow?: number;
+    speedMultiplier?: number;
 }
 
 function OriginkitBaseVortex(props: VortexProps) {
@@ -1248,6 +1255,10 @@ function OriginkitBaseVortex(props: VortexProps) {
         repel = DEFAULTS.repel,
         repelOptions = DEFAULTS.repelOptions,
         style,
+        className,
+        intensity = 1.0,
+        glow = 1.0,
+        speedMultiplier = 1.0,
     } = props;
 
     const containerRef = React.useRef<HTMLDivElement>(null);
@@ -1268,21 +1279,21 @@ function OriginkitBaseVortex(props: VortexProps) {
         twist,
         zoom,
         flowDir: direction === "left" ? -1 : 1,
-        flowSpeed: (speed / 100) * (direction === "left" ? -1 : 1),
+        flowSpeed: (speed / 100) * (direction === "left" ? -1 : 1) * speedMultiplier * intensity,
         lineCount: line.count,
         lineColor: line.color,
-        lineGlow: (line.glow / 10) * LINE_GLOW_MAX,
+        lineGlow: (line.glow / 10) * LINE_GLOW_MAX * glow * intensity,
         showDots: dots,
         dotCount: dot.count,
         dotSize: dot.size / DOT_SIZE_SCALE,
         dotColor: dot.color,
-        dotGlow: (dot.glow / 10) * DOT_GLOW_MAX,
+        dotGlow: (dot.glow / 10) * DOT_GLOW_MAX * glow * intensity,
         dotFlicker: dot.flicker / 10,
         showComets: comets,
         cometCount: comet.count,
-        cometSpeed: (comet.speed / 10) * COMET_SPEED_MAX,
+        cometSpeed: (comet.speed / 10) * COMET_SPEED_MAX * speedMultiplier * intensity,
         cometColor: comet.color,
-        cometGlow: (comet.glow / 10) * COMET_GLOW_MAX,
+        cometGlow: (comet.glow / 10) * COMET_GLOW_MAX * glow * intensity,
         cometTail: comet.tail,
         cometDelay: comet.delay,
         collideForce: comet.collide / 10,
@@ -1337,6 +1348,7 @@ function OriginkitBaseVortex(props: VortexProps) {
     return (
         <div
             ref={containerRef}
+            className={className}
             style={{
                 ...style,
                 position: "relative",

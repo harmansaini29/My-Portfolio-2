@@ -22,6 +22,45 @@ const ROLES = [
   'Horology Analyst',
 ];
 
+const HeroTelemetryLeft = React.memo(function HeroTelemetryLeft() {
+  return (
+    <div className="hero-telemetry-left" aria-hidden>
+      <div className="hero-telemetry-line" />
+      <span className="hero-telemetry-text">LAT 28 38&apos; N // HIGH POWER // 120 FPS WebGL</span>
+      <div className="hero-telemetry-line" />
+    </div>
+  );
+});
+
+const HeroTelemetryRight = React.memo(function HeroTelemetryRight() {
+  return (
+    <div className="hero-telemetry-right" aria-hidden>
+      <div className="hero-telemetry-line" />
+      <span className="hero-telemetry-text">LON 77 13&apos; E // &lt;10MS LATENCY // CORE ACTIVE</span>
+      <div className="hero-telemetry-line" />
+    </div>
+  );
+});
+
+const HeroPowerBadges = React.memo(function HeroPowerBadges() {
+  return (
+    <div className="hero-power-badges">
+      <div className="hero-power-badge">
+        <span className="hero-power-dot cyan" />
+        <span>High Power Core</span>
+      </div>
+      <div className="hero-power-badge">
+        <span className="hero-power-dot emerald" />
+        <span>&lt;10ms Latency</span>
+      </div>
+      <div className="hero-power-badge">
+        <span className="hero-power-dot indigo" />
+        <span>120 FPS WebGL</span>
+      </div>
+    </div>
+  );
+});
+
 export default function LiquidRevealHero({
   baseSrc,
   chromeSrc,
@@ -49,50 +88,65 @@ export default function LiquidRevealHero({
     window.setTimeout(() => setSpinning(false), 500);
   }, [baseSrc, chromeSrc]);
 
-  // Smooth Scroll Parallax
+  // Visibility state to pause RAF loops when offscreen
+  const [isInView, setIsInView] = useState(true);
+
   useEffect(() => {
     const hero = heroRef.current;
+    if (!hero || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
+
+  // Direct, low-overhead scroll parallax optimized for Lenis RAF loop (zero double-lerp lag)
+  useEffect(() => {
     const imgBottom = imgBottomRef.current;
     const imgTop = imgTopRef.current;
     const bottomLeft = bottomLeftRef.current;
-    if (!hero || !imgBottom || !imgTop || !bottomLeft) return;
+    if (!imgBottom || !imgTop || !bottomLeft) return;
 
-    let scrollY = 0;
-    let smoothY = 0;
     let rafId = 0;
-    let active = true;
+    let isScheduled = false;
 
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const updateParallax = () => {
+      isScheduled = false;
+      if (!isInView) return;
 
-    const tick = () => {
-      if (!active) return;
-      smoothY = lerp(smoothY, scrollY, 0.08);
+      const scrollY = window.scrollY || 0;
+      const maxH = window.innerHeight || 900;
+      if (scrollY > maxH * 1.5) return; // Completely offscreen
 
-      const maxScroll = window.innerHeight || 800;
-      const t = Math.min(1, Math.max(0, smoothY / maxScroll));
+      const t = Math.min(1, Math.max(0, scrollY / maxH));
 
-      imgBottom.style.transform = `translate3d(0, ${(t * -50).toFixed(2)}px, 0) scale(${(1 + t * 0.05).toFixed(4)})`;
-      imgTop.style.transform = `translate3d(0, ${(t * -30).toFixed(2)}px, 0) scale(${(1 + t * 0.03).toFixed(4)})`;
-
+      // Direct hardware-accelerated transforms - perfectly synchronized with Lenis
+      imgBottom.style.transform = `translate3d(0, ${(t * -60).toFixed(2)}px, 0) scale(${(1 + t * 0.04).toFixed(4)})`;
+      imgTop.style.transform = `translate3d(0, ${(t * -35).toFixed(2)}px, 0) scale(${(1 + t * 0.02).toFixed(4)})`;
       bottomLeft.style.transform = `translate3d(0, ${(t * -70).toFixed(2)}px, 0)`;
-      bottomLeft.style.opacity = Math.max(0, 1 - t * 2.5).toFixed(3);
-
-      rafId = requestAnimationFrame(tick);
+      bottomLeft.style.opacity = Math.max(0, 1 - t * 2.2).toFixed(3);
     };
 
     const onScroll = () => {
-      scrollY = window.scrollY;
+      if (!isScheduled && isInView) {
+        isScheduled = true;
+        rafId = requestAnimationFrame(updateParallax);
+      }
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    rafId = requestAnimationFrame(tick);
+    updateParallax();
 
     return () => {
-      active = false;
       window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(rafId);
+      if (rafId) cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [isInView]);
 
   // 120 FPS Fluid Pointer Mask Loop
   useEffect(() => {
@@ -102,35 +156,29 @@ export default function LiquidRevealHero({
     const hintEl = hintRef.current;
     if (!hero || !imgTop || !glow || !hintEl) return;
 
-    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (isReduced) {
-      glow.style.display = 'none';
-      return;
-    }
-
-    let w = window.innerWidth;
-    let h = window.innerHeight;
+    let w = hero.clientWidth || window.innerWidth;
+    let h = hero.clientHeight || window.innerHeight;
 
     const onResize = () => {
-      w = window.innerWidth;
-      h = window.innerHeight;
+      if (!hero) return;
+      w = hero.clientWidth || window.innerWidth;
+      h = hero.clientHeight || window.innerHeight;
     };
     window.addEventListener('resize', onResize, { passive: true });
 
     const target = { x: w * 0.5, y: h * 0.5 };
     const head = { x: w * 0.5, y: h * 0.5 };
     const lag = { x: w * 0.5, y: h * 0.5 };
-
     let pointerActive = false;
     let lastPointerTime = 0;
     let radius = 0;
-    let targetRadius = 28;
+    let targetRadius = 26;
     const feather = 0.65;
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
     const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
-
     let idleT = 0;
+
     const getIdlePos = (t: number) => {
       const cx = w * 0.5;
       const cy = h * 0.48;
@@ -143,8 +191,9 @@ export default function LiquidRevealHero({
     };
 
     const updatePointer = (clientX: number, clientY: number) => {
-      target.x = clientX;
-      target.y = clientY;
+      const rect = hero.getBoundingClientRect();
+      target.x = clientX - rect.left;
+      target.y = clientY - rect.top;
       pointerActive = true;
       lastPointerTime = performance.now();
       targetRadius = 28;
@@ -153,40 +202,47 @@ export default function LiquidRevealHero({
 
     const handlePointerMove = (e: PointerEvent) => updatePointer(e.clientX, e.clientY);
     const handlePointerDown = (e: PointerEvent) => updatePointer(e.clientX, e.clientY);
-    const handlePointerLeave = () => { pointerActive = false; };
+    const handlePointerEnd = () => { pointerActive = false; };
 
     hero.addEventListener('pointermove', handlePointerMove, { passive: true });
     hero.addEventListener('pointerdown', handlePointerDown, { passive: true });
-    hero.addEventListener('pointerleave', handlePointerLeave, { passive: true });
+    hero.addEventListener('pointerleave', handlePointerEnd, { passive: true });
+    hero.addEventListener('pointerup', handlePointerEnd, { passive: true });
+    hero.addEventListener('pointercancel', handlePointerEnd, { passive: true });
 
     let lastTime = performance.now();
     let rafId = 0;
 
     const frame = (now: number) => {
-      const dt = Math.min(48, now - lastTime) / 1000;
+      if (!isInView) {
+        rafId = 0;
+        return;
+      }
+
+      const dt = Math.min(36, now - lastTime) / 1000;
       lastTime = now;
 
-      const idle = !pointerActive && now - lastPointerTime > 1100;
+      const idle = !pointerActive && now - lastPointerTime > 1200;
       if (idle) {
-        idleT += dt * 0.65;
+        idleT += dt * 0.7;
         const p = getIdlePos(idleT);
         target.x = p.x;
         target.y = p.y;
         targetRadius = 22;
       }
 
-      const easeHead = 1 - Math.pow(0.0015, dt);
+      const easeHead = 1 - Math.pow(0.002, dt);
       head.x = lerp(head.x, target.x, easeHead);
       head.y = lerp(head.y, target.y, easeHead);
 
-      const easeLag = 1 - Math.pow(0.015, dt);
+      const easeLag = 1 - Math.pow(0.018, dt);
       lag.x = lerp(lag.x, head.x, easeLag);
       lag.y = lerp(lag.y, head.y, easeLag);
 
-      const easeRad = 1 - Math.pow(0.02, dt);
+      const easeRad = 1 - Math.pow(0.025, dt);
       radius = lerp(radius, Math.max(targetRadius, 0.001), easeRad);
 
-      if (!idle && now - lastPointerTime > 160) {
+      if (!idle && now - lastPointerTime > 180) {
         targetRadius = lerp(targetRadius, 0.001, easeRad * 0.6);
       }
 
@@ -194,7 +250,6 @@ export default function LiquidRevealHero({
       const hyPct = (head.y / h) * 100;
       const lxPct = (lag.x / w) * 100;
       const lyPct = (lag.y / h) * 100;
-
       const corePct = radius * feather;
       const lagR = radius * 0.82;
       const lagCore = lagR * feather;
@@ -215,26 +270,29 @@ export default function LiquidRevealHero({
       rafId = requestAnimationFrame(frame);
     };
 
-    rafId = requestAnimationFrame(frame);
+    if (isInView) {
+      rafId = requestAnimationFrame(frame);
+    }
 
     return () => {
       window.removeEventListener('resize', onResize);
       hero.removeEventListener('pointermove', handlePointerMove);
       hero.removeEventListener('pointerdown', handlePointerDown);
-      hero.removeEventListener('pointerleave', handlePointerLeave);
-      cancelAnimationFrame(rafId);
+      hero.removeEventListener('pointerleave', handlePointerEnd);
+      hero.removeEventListener('pointerup', handlePointerEnd);
+      hero.removeEventListener('pointercancel', handlePointerEnd);
+      if (rafId) cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [isInView]);
 
   return (
     <div className="hero" id="hero" ref={heroRef}>
       <ParticleField />
-
       <img
         className="layerChrome"
         id="imgBottom"
         src={bottomSrc}
-        alt="Harman Saini Chrome Layer"
+        alt="Harman Saini Background"
         draggable={false}
         ref={imgBottomRef}
       />
@@ -242,24 +300,15 @@ export default function LiquidRevealHero({
         className="layerBase"
         id="imgTop"
         src={topSrc}
-        alt="Harman Saini Reveal Layer"
+        alt="Harman Saini Reveal"
         draggable={false}
         ref={imgTopRef}
       />
       <div className="glow" id="glow" ref={glowRef} />
 
       {/* Perimeter Telemetry */}
-      <div className="hero-telemetry-left" aria-hidden>
-        <div className="hero-telemetry-line" />
-        <span className="hero-telemetry-text">LAT 28°38&apos; N // 120 FPS WebGL</span>
-        <div className="hero-telemetry-line" />
-      </div>
-
-      <div className="hero-telemetry-right" aria-hidden>
-        <div className="hero-telemetry-line" />
-        <span className="hero-telemetry-text">LON 77°13&apos; E // CORE ACTIVE</span>
-        <div className="hero-telemetry-line" />
-      </div>
+      <HeroTelemetryLeft />
+      <HeroTelemetryRight />
 
       {/* Top Right Controls */}
       <div className="top-right-controls">
@@ -269,6 +318,7 @@ export default function LiquidRevealHero({
             type="button"
             aria-label="Swap background and foreground layers"
             onClick={handleSwap}
+            suppressHydrationWarning
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
               <polyline points="17 1 21 5 17 9" />
@@ -286,14 +336,14 @@ export default function LiquidRevealHero({
           <span className="wave-hand">👋</span>
           <span className="greeting-silver-subtitle">Hey mate, I am</span>
         </div>
-
         <div className="hero-silver-title-wrapper">
           <div className="hero-silver-backglow" aria-hidden />
           <h1 className="hero-silver-title">{name}</h1>
         </div>
-
-        {/* 3D Perspective Dice Role Flipper */}
         <DiceRoleFlipper roles={ROLES} intervalMs={3000} />
+
+        {/* High Power & Latency Telemetry Matrix */}
+        <HeroPowerBadges />
       </div>
 
       <div className="hint" id="hint" ref={hintRef}>
