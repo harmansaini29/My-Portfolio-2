@@ -1,18 +1,8 @@
 'use client';
 
-import './Hero.css';
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useEffect, useRef, useState } from 'react';
 import DiceRoleFlipper from './DiceRoleFlipper';
-
-const ParticleField = dynamic(() => import('./ParticleField'), { ssr: false });
-
-interface LiquidRevealHeroProps {
-  baseSrc: string;
-  chromeSrc: string;
-  name?: string;
-  hint?: string;
-}
+import './Hero.css';
 
 const ROLES = [
   'Full Stack Developer',
@@ -22,333 +12,264 @@ const ROLES = [
   'Horology Analyst',
 ];
 
-const HeroTelemetryLeft = React.memo(function HeroTelemetryLeft() {
-  return (
-    <div className="hero-telemetry-left" aria-hidden>
-      <div className="hero-telemetry-line" />
-      <span className="hero-telemetry-text">LAT 28 38&apos; N // HIGH POWER // 120 FPS WebGL</span>
-      <div className="hero-telemetry-line" />
-    </div>
-  );
-});
+interface HeroProps {
+  baseSrc?: string;
+  portraitSrc?: string;
+  chromeSrc?: string;
+  name?: string;
+  hint?: string;
+}
 
-const HeroTelemetryRight = React.memo(function HeroTelemetryRight() {
-  return (
-    <div className="hero-telemetry-right" aria-hidden>
-      <div className="hero-telemetry-line" />
-      <span className="hero-telemetry-text">LON 77 13&apos; E // &lt;10MS LATENCY // CORE ACTIVE</span>
-      <div className="hero-telemetry-line" />
-    </div>
-  );
-});
-
-const HeroPowerBadges = React.memo(function HeroPowerBadges() {
-  return (
-    <div className="hero-power-badges">
-      <div className="hero-power-badge">
-        <span className="hero-power-dot cyan" />
-        <span>High Power Core</span>
-      </div>
-      <div className="hero-power-badge">
-        <span className="hero-power-dot emerald" />
-        <span>&lt;10ms Latency</span>
-      </div>
-      <div className="hero-power-badge">
-        <span className="hero-power-dot indigo" />
-        <span>120 FPS WebGL</span>
-      </div>
-    </div>
-  );
-});
-
-export default function LiquidRevealHero({
-  baseSrc,
-  chromeSrc,
+export default function Hero({
+  baseSrc = '/images/base.png',
+  portraitSrc = '/images/portrait.png',
+  chromeSrc = '/images/chrome.png',
   name = 'Harman Saini',
-  hint = 'Move cursor to reveal',
-}: LiquidRevealHeroProps) {
+  hint = 'Move cursor to reveal'
+}: HeroProps) {
   const heroRef = useRef<HTMLDivElement>(null);
-  const imgTopRef = useRef<HTMLImageElement>(null);
+  const imgTopRef = useRef<HTMLDivElement>(null);
   const imgBottomRef = useRef<HTMLImageElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
   const bottomLeftRef = useRef<HTMLDivElement>(null);
 
-  const [topSrc, setTopSrc] = useState(chromeSrc);
-  const [bottomSrc, setBottomSrc] = useState(baseSrc);
+  const [activeIdx, setActiveIdx] = useState(0);
   const [spinning, setSpinning] = useState(false);
 
-  useEffect(() => { setTopSrc(chromeSrc); }, [chromeSrc]);
-  useEffect(() => { setBottomSrc(baseSrc); }, [baseSrc]);
-
-  const handleSwap = useCallback(() => {
-    setTopSrc((prev) => (prev === chromeSrc ? baseSrc : chromeSrc));
-    setBottomSrc((prev) => (prev === baseSrc ? chromeSrc : baseSrc));
+  const handleSwap = () => {
+    setActiveIdx((prev) => (prev === 0 ? 1 : 0));
     setSpinning(true);
-    window.setTimeout(() => setSpinning(false), 500);
-  }, [baseSrc, chromeSrc]);
-
-  // Visibility state to pause RAF loops when offscreen
-  const [isInView, setIsInView] = useState(true);
+    setTimeout(() => setSpinning(false), 500);
+  };
 
   useEffect(() => {
     const hero = heroRef.current;
-    if (!hero || typeof IntersectionObserver === 'undefined') return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsInView(entry.isIntersecting);
-      },
-      { threshold: 0.05 }
-    );
-    observer.observe(hero);
-    return () => observer.disconnect();
-  }, []);
-
-  // Direct, low-overhead scroll parallax optimized for Lenis RAF loop (zero double-lerp lag)
-  useEffect(() => {
+    const imgTop = imgTopRef.current;
     const imgBottom = imgBottomRef.current;
-    const imgTop = imgTopRef.current;
-    const bottomLeft = bottomLeftRef.current;
-    if (!imgBottom || !imgTop || !bottomLeft) return;
-
-    let rafId = 0;
-    let isScheduled = false;
-
-    const updateParallax = () => {
-      isScheduled = false;
-      if (!isInView) return;
-
-      const scrollY = window.scrollY || 0;
-      const maxH = window.innerHeight || 900;
-      if (scrollY > maxH * 1.5) return; // Completely offscreen
-
-      const t = Math.min(1, Math.max(0, scrollY / maxH));
-
-      // Direct hardware-accelerated transforms - perfectly synchronized with Lenis
-      imgBottom.style.transform = `translate3d(0, ${(t * -60).toFixed(2)}px, 0) scale(${(1 + t * 0.04).toFixed(4)})`;
-      imgTop.style.transform = `translate3d(0, ${(t * -35).toFixed(2)}px, 0) scale(${(1 + t * 0.02).toFixed(4)})`;
-      bottomLeft.style.transform = `translate3d(0, ${(t * -70).toFixed(2)}px, 0)`;
-      bottomLeft.style.opacity = Math.max(0, 1 - t * 2.2).toFixed(3);
-    };
-
-    const onScroll = () => {
-      if (!isScheduled && isInView) {
-        isScheduled = true;
-        rafId = requestAnimationFrame(updateParallax);
-      }
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    updateParallax();
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [isInView]);
-
-  // 120 FPS Fluid Pointer Mask Loop
-  useEffect(() => {
-    const hero = heroRef.current;
-    const imgTop = imgTopRef.current;
     const glow = glowRef.current;
     const hintEl = hintRef.current;
-    if (!hero || !imgTop || !glow || !hintEl) return;
+    const bottomLeft = bottomLeftRef.current;
 
-    let w = hero.clientWidth || window.innerWidth;
-    let h = hero.clientHeight || window.innerHeight;
+    if (!hero || !imgTop || !imgBottom || !glow || !hintEl || !bottomLeft) return;
 
-    const onResize = () => {
-      if (!hero) return;
-      w = hero.clientWidth || window.innerWidth;
-      h = hero.clientHeight || window.innerHeight;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Visibility
+    let inView = true;
+    let observer: IntersectionObserver | null = null;
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver((e) => {
+        inView = e[0].isIntersecting;
+      }, { threshold: .05 });
+      observer.observe(hero);
+    }
+
+    // Parallax
+    let sched = false;
+    function parallax() {
+      sched = false;
+      if (!inView) return;
+      const sy = window.scrollY || 0;
+      const mh = window.innerHeight || 900;
+      if (sy > mh * 1.5) return;
+      const t = Math.min(1, Math.max(0, sy / mh));
+      imgBottom!.style.transform = `translate3d(0, ${(t * -60).toFixed(2)}px, 0) scale(${(1 + t * .04).toFixed(4)})`;
+      imgTop!.style.transform = `translate3d(0, ${(t * -35).toFixed(2)}px, 0) scale(${(1 + t * .02).toFixed(4)})`;
+      bottomLeft!.style.transform = `translate3d(0, ${(t * -70).toFixed(2)}px, 0)`;
+      bottomLeft!.style.opacity = Math.max(0, 1 - t * 2.2).toFixed(3);
+    }
+    const onScroll = () => {
+      if (!sched) {
+        sched = true;
+        requestAnimationFrame(parallax);
+      }
     };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Pointer mask loop
+    let w = hero.clientWidth, h = hero.clientHeight;
+    const onResize = () => { w = hero.clientWidth; h = hero.clientHeight; };
     window.addEventListener('resize', onResize, { passive: true });
 
-    const target = { x: w * 0.5, y: h * 0.5 };
-    const head = { x: w * 0.5, y: h * 0.5 };
-    const lag = { x: w * 0.5, y: h * 0.5 };
-    let pointerActive = false;
-    let lastPointerTime = 0;
-    let radius = 0;
-    let targetRadius = 26;
-    const feather = 0.65;
-
+    const target = { x: w * .5, y: h * .5 }, head = { x: w * .5, y: h * .5 }, lag = { x: w * .5, y: h * .5 };
+    let active = false, lastPtr = 0, radius = 0, targetR = 26, feather = .65, idleT = 0;
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-    const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
-    let idleT = 0;
 
-    const getIdlePos = (t: number) => {
-      const cx = w * 0.5;
-      const cy = h * 0.48;
-      const rx = w * 0.22;
-      const ry = h * 0.16;
+    function idlePos(t: number) {
       return {
-        x: cx + Math.sin(t * 0.6) * rx + Math.sin(t * 0.18) * rx * 0.3,
-        y: cy + Math.cos(t * 0.45) * ry + Math.sin(t * 0.25) * ry * 0.2,
+        x: w * .5 + Math.sin(t * .8) * w * .3 + Math.sin(t * .24) * w * .09,
+        y: h * .48 + Math.cos(t * .6) * h * .22 + Math.sin(t * .35) * h * .044
       };
-    };
+    }
 
-    const updatePointer = (clientX: number, clientY: number) => {
-      const rect = hero.getBoundingClientRect();
-      target.x = clientX - rect.left;
-      target.y = clientY - rect.top;
-      pointerActive = true;
-      lastPointerTime = performance.now();
-      targetRadius = 28;
-      hintEl.style.opacity = '0';
-    };
+    function ptr(e: PointerEvent) {
+      const r = hero!.getBoundingClientRect();
+      target.x = e.clientX - r.left;
+      target.y = e.clientY - r.top;
+      active = true;
+      lastPtr = performance.now();
+      targetR = 38;
+      hintEl!.style.opacity = '0';
+    }
 
-    const handlePointerMove = (e: PointerEvent) => updatePointer(e.clientX, e.clientY);
-    const handlePointerDown = (e: PointerEvent) => updatePointer(e.clientX, e.clientY);
-    const handlePointerEnd = () => { pointerActive = false; };
+    const onPtrEnd = () => { active = false; };
+    
+    // Type assertions to any because React refs typing vs DOM event types can sometimes mismatch
+    hero.addEventListener('pointermove', ptr as any, { passive: true });
+    hero.addEventListener('pointerdown', ptr as any, { passive: true });
+    
+    ['pointerleave', 'pointerup', 'pointercancel'].forEach(n => {
+      hero.addEventListener(n, onPtrEnd, { passive: true });
+    });
 
-    hero.addEventListener('pointermove', handlePointerMove, { passive: true });
-    hero.addEventListener('pointerdown', handlePointerDown, { passive: true });
-    hero.addEventListener('pointerleave', handlePointerEnd, { passive: true });
-    hero.addEventListener('pointerup', handlePointerEnd, { passive: true });
-    hero.addEventListener('pointercancel', handlePointerEnd, { passive: true });
+    let last = performance.now();
+    let rafId: number;
 
-    let lastTime = performance.now();
-    let rafId = 0;
-
-    const frame = (now: number) => {
-      if (!isInView) {
-        rafId = 0;
+    function frame(now: number) {
+      if (!inView) {
+        rafId = requestAnimationFrame(frame);
         return;
       }
+      const dt = Math.min(36, now - last) / 1000;
+      last = now;
 
-      const dt = Math.min(36, now - lastTime) / 1000;
-      lastTime = now;
-
-      const idle = !pointerActive && now - lastPointerTime > 1200;
+      const idle = !active && now - lastPtr > 600;
       if (idle) {
-        idleT += dt * 0.7;
-        const p = getIdlePos(idleT);
-        target.x = p.x;
-        target.y = p.y;
-        targetRadius = 22;
+        idleT += dt * .8;
+        const p = idlePos(idleT);
+        target.x = p.x; target.y = p.y;
+        targetR = 32;
       }
 
-      const easeHead = 1 - Math.pow(0.002, dt);
-      head.x = lerp(head.x, target.x, easeHead);
-      head.y = lerp(head.y, target.y, easeHead);
+      const eh = 1 - Math.pow(.001, dt);
+      head.x = lerp(head.x, target.x, eh);
+      head.y = lerp(head.y, target.y, eh);
 
-      const easeLag = 1 - Math.pow(0.018, dt);
-      lag.x = lerp(lag.x, head.x, easeLag);
-      lag.y = lerp(lag.y, head.y, easeLag);
+      const el = 1 - Math.pow(.012, dt);
+      lag.x = lerp(lag.x, head.x, el);
+      lag.y = lerp(lag.y, head.y, el);
 
-      const easeRad = 1 - Math.pow(0.025, dt);
-      radius = lerp(radius, Math.max(targetRadius, 0.001), easeRad);
+      const er = 1 - Math.pow(.015, dt);
+      radius = lerp(radius, Math.max(targetR, .001), er);
 
-      if (!idle && now - lastPointerTime > 180) {
-        targetRadius = lerp(targetRadius, 0.001, easeRad * 0.6);
+      if (!idle && now - lastPtr > 180) {
+        targetR = lerp(targetR, .001, er * .6);
       }
 
-      const hxPct = (head.x / w) * 100;
-      const hyPct = (head.y / h) * 100;
-      const lxPct = (lag.x / w) * 100;
-      const lyPct = (lag.y / h) * 100;
-      const corePct = radius * feather;
-      const lagR = radius * 0.82;
-      const lagCore = lagR * feather;
+      const lagR = radius * .82;
+      const m = `radial-gradient(circle at ${(head.x / w * 100).toFixed(2)}% ${(head.y / h * 100).toFixed(2)}%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) ${(radius * feather).toFixed(2)}%, rgba(0,0,0,1) ${radius.toFixed(2)}%), ` +
+                `radial-gradient(circle at ${(lag.x / w * 100).toFixed(2)}% ${(lag.y / h * 100).toFixed(2)}%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) ${(lagR * feather).toFixed(2)}%, rgba(0,0,0,1) ${lagR.toFixed(2)}%)`;
 
-      const maskStr =
-        `radial-gradient(circle at ${hxPct.toFixed(2)}% ${hyPct.toFixed(2)}%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) ${corePct.toFixed(2)}%, rgba(0,0,0,1) ${radius.toFixed(2)}%), ` +
-        `radial-gradient(circle at ${lxPct.toFixed(2)}% ${lyPct.toFixed(2)}%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) ${lagCore.toFixed(2)}%, rgba(0,0,0,1) ${lagR.toFixed(2)}%)`;
+      imgTop!.style.webkitMaskImage = m;
+      imgTop!.style.maskImage = m;
 
-      imgTop.style.webkitMaskImage = maskStr;
-      imgTop.style.maskImage = maskStr;
+      const open = Math.max(0, Math.min(1, radius / 28));
+      glow!.style.transform = `translate3d(${(head.x - w * .5).toFixed(1)}px,${(head.y - h * .5).toFixed(1)}px,0)`;
+      glow!.style.opacity = (.35 * open).toFixed(3);
 
-      const openness = clamp01(radius / 28);
-      const gx = head.x - w * 0.5;
-      const gy = head.y - h * 0.5;
-      glow.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
-      glow.style.opacity = (0.35 * openness).toFixed(3);
-
-      rafId = requestAnimationFrame(frame);
-    };
-
-    if (isInView) {
       rafId = requestAnimationFrame(frame);
     }
 
+    if (!reduce) rafId = requestAnimationFrame(frame);
+
     return () => {
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
-      hero.removeEventListener('pointermove', handlePointerMove);
-      hero.removeEventListener('pointerdown', handlePointerDown);
-      hero.removeEventListener('pointerleave', handlePointerEnd);
-      hero.removeEventListener('pointerup', handlePointerEnd);
-      hero.removeEventListener('pointercancel', handlePointerEnd);
+      hero.removeEventListener('pointermove', ptr as any);
+      hero.removeEventListener('pointerdown', ptr as any);
+      ['pointerleave', 'pointerup', 'pointercancel'].forEach(n => {
+        hero.removeEventListener(n, onPtrEnd);
+      });
+      if (observer) observer.disconnect();
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [isInView]);
+  }, []);
 
   return (
     <div className="hero" id="hero" ref={heroRef}>
-      <ParticleField />
       <img
         className="layerChrome"
         id="imgBottom"
-        src={bottomSrc}
-        alt="Harman Saini Background"
-        draggable={false}
+        src={baseSrc}
+        alt=""
         ref={imgBottomRef}
-      />
-      <img
-        className="layerBase"
-        id="imgTop"
-        src={topSrc}
-        alt="Harman Saini Reveal"
         draggable={false}
-        ref={imgTopRef}
+        data-fit="cover"
+        data-position="top"
       />
-      <div className="glow" id="glow" ref={glowRef} />
+      
+      <div className="layerBase" id="imgTop" ref={imgTopRef}>
+        <img
+          className={activeIdx === 0 ? "isActive" : ""}
+          style={{ translate: "0% 0%", scale: "1", transformOrigin: "50% 0%" }}
+          src={portraitSrc}
+          alt={activeIdx === 0 ? "Portrait" : ""}
+          aria-hidden={activeIdx !== 0}
+          draggable={false}
+          data-fit="cover"
+          data-position="top"
+        />
+        <img
+          className={activeIdx === 1 ? "isActive" : ""}
+          style={{ translate: "0% 0%", scale: "1", transformOrigin: "50% 0%" }}
+          src={chromeSrc}
+          alt={activeIdx === 1 ? "Younger portrait" : ""}
+          aria-hidden={activeIdx !== 1}
+          draggable={false}
+          data-fit="cover"
+          data-position="top"
+        />
+      </div>
+      
+      <div className="glow" id="glow" ref={glowRef}></div>
 
-      {/* Perimeter Telemetry */}
-      <HeroTelemetryLeft />
-      <HeroTelemetryRight />
-
-      {/* Top Right Controls */}
-      <div className="top-right-controls">
-        <div className="swap-wrapper">
-          <button
-            className={`swapBtnIcon${spinning ? ' spinning' : ''}`}
-            type="button"
-            aria-label="Swap background and foreground layers"
-            onClick={handleSwap}
-            suppressHydrationWarning
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="17 1 21 5 17 9" />
-              <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-              <polyline points="7 23 3 19 7 15" />
-              <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-            </svg>
-          </button>
-        </div>
+      <div className="tele l" aria-hidden="true">
+        <div className="tele-line"></div>
+        <span className="tele-text">LAT 28 38' N // HIGH POWER // 120 FPS WebGL</span>
+        <div className="tele-line"></div>
+      </div>
+      
+      <div className="tele r" aria-hidden="true">
+        <div className="tele-line"></div>
+        <span className="tele-text">LON 77 13' E // &lt;10MS LATENCY // CORE ACTIVE</span>
+        <div className="tele-line"></div>
       </div>
 
-      {/* Bottom Left Identity Section */}
-      <div className="bottom-left-section" ref={bottomLeftRef}>
+      <div className="top-right-controls">
+        <button 
+          className={`swapBtnIcon ${spinning ? 'spinning' : ''}`} 
+          id="swap" 
+          type="button" 
+          onClick={handleSwap} 
+          aria-label="Swap between the two portraits"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="17 1 21 5 17 9"/>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+        </button>
+      </div>
+
+      <div className="bottom-left-section" id="bottomLeft" ref={bottomLeftRef}>
         <div className="greeting-row">
           <span className="wave-hand">👋</span>
           <span className="greeting-silver-subtitle">Hey mate, I am</span>
         </div>
         <div className="hero-silver-title-wrapper">
-          <div className="hero-silver-backglow" aria-hidden />
+          <div className="hero-silver-backglow" aria-hidden="true"></div>
           <h1 className="hero-silver-title">{name}</h1>
         </div>
         <DiceRoleFlipper roles={ROLES} intervalMs={3000} />
-
-        {/* High Power & Latency Telemetry Matrix */}
-        <HeroPowerBadges />
+        <div className="hero-power-badges">
+          <div className="hero-power-badge"><span className="hero-power-dot cyan"></span><span>High Power Core</span></div>
+          <div className="hero-power-badge"><span className="hero-power-dot emerald"></span><span>&lt;10ms Latency</span></div>
+          <div className="hero-power-badge"><span className="hero-power-dot indigo"></span><span>120 FPS WebGL</span></div>
+        </div>
       </div>
-
-      <div className="hint" id="hint" ref={hintRef}>
-        {hint}
-      </div>
+      <div className="hint" id="hint" ref={hintRef}>{hint}</div>
     </div>
   );
 }

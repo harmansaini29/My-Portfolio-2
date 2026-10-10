@@ -10,13 +10,13 @@ type Ease = (t: number) => number
 
 const outPow =
     (n: number): Ease =>
-    (t) =>
-        1 - Math.pow(1 - t, n)
+        (t) =>
+            1 - Math.pow(1 - t, n)
 
 const inOutPow =
     (n: number): Ease =>
-    (t) =>
-        t < 0.5 ? Math.pow(2 * t, n) / 2 : 1 - Math.pow(2 - 2 * t, n) / 2
+        (t) =>
+            t < 0.5 ? Math.pow(2 * t, n) / 2 : 1 - Math.pow(2 - 2 * t, n) / 2
 
 const OUT3 = outPow(3)
 const INOUT2 = inOutPow(2)
@@ -26,10 +26,10 @@ const EXPO_INOUT: Ease = (t) =>
     t <= 0
         ? 0
         : t >= 1
-          ? 1
-          : t < 0.5
-            ? Math.pow(2, 20 * t - 10) / 2
-            : (2 - Math.pow(2, -20 * t + 10)) / 2
+            ? 1
+            : t < 0.5
+                ? Math.pow(2, 20 * t - 10) / 2
+                : (2 - Math.pow(2, -20 * t + 10)) / 2
 
 export interface FramerTransition {
     type?: string
@@ -86,7 +86,7 @@ function springCurve(stiffness: number, damping: number, mass: number) {
         at = (t) =>
             1 -
             Math.exp(-zeta * w0 * t) *
-                (Math.cos(wd * t) + ((zeta * w0) / wd) * Math.sin(wd * t))
+            (Math.cos(wd * t) + ((zeta * w0) / wd) * Math.sin(wd * t))
     } else if (zeta === 1) {
         at = (t) => 1 - Math.exp(-w0 * t) * (1 + w0 * t)
     } else {
@@ -231,12 +231,12 @@ class Timeline {
     }
 }
 
-const lensVertexShader =  `
+const lensVertexShader = `
   varying vec2 vUv;
   void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
 `
 
-const lensFragmentShader =  `
+const lensFragmentShader = `
   #define PI 3.14159265
   precision highp float;
   varying vec2 vUv;
@@ -486,6 +486,10 @@ export interface MotionSettings {
     sensitivity?: number
     glide?: number
     snap?: boolean
+    autoScroll?: boolean
+    autoScrollSpeed?: number
+    pauseOnHover?: boolean
+    resumeDelay?: number
 }
 
 export interface EntrySettings {
@@ -507,6 +511,7 @@ export interface LiquidGlassCarouselProps {
     sizeMode?: string
     cardWidth?: number
     cardHeight?: number
+    onFocusChange?: (index: number) => void
 
     panelHeight?: number
     gap?: number
@@ -573,6 +578,12 @@ function makeParams(p: LiquidGlassCarouselProps) {
         clickSlop: 6,
         touchClickSlop: 12,
         flickIdleMs: 90,
+
+        // Continuous Auto-Scroll Settings
+        autoScroll: m.autoScroll !== false,
+        autoScrollSpeed: typeof m.autoScrollSpeed === "number" ? m.autoScrollSpeed : 38,
+        pauseOnHover: m.pauseOnHover === true,
+        resumeDelay: typeof m.resumeDelay === "number" ? m.resumeDelay : 1200,
 
         wheel: it.wheel !== false,
         drag: it.drag !== false,
@@ -713,7 +724,7 @@ interface PanelRect {
     centerX: number
 }
 
-function createEngine(mount: HTMLElement, getParams: () => Params) {
+function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange?: (index: number) => void) {
     let pp = getParams()
     const still = false
     let disposed = false
@@ -731,16 +742,18 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
     function applyClear() {
         if (pp.background === clearKey) return
         clearKey = pp.background
-        if (pp.background === 'transparent') {
+
+        if (pp.background === "transparent") {
             renderer.setClearColor(0x000000, 0)
-        } else {
-            try {
-                clearColor.set(pp.background)
-            } catch {
-                clearColor.set("#ffffff")
-            }
-            renderer.setClearColor(clearColor, 1)
+            return
         }
+
+        try {
+            clearColor.set(pp.background)
+        } catch {
+            clearColor.set("#ffffff")
+        }
+        renderer.setClearColor(clearColor, 1)
     }
     applyClear()
 
@@ -944,7 +957,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
 
     try {
         renderer.compile(lensScene, lensCam)
-    } catch {}
+    } catch { }
 
     let ringKey = ""
     function syncLens(now: number) {
@@ -1077,7 +1090,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
 
                     try {
                         renderer.initTexture(tex)
-                    } catch {}
+                    } catch { }
                     recomputeTotal()
                     if (--awaiting <= 0) boot()
                     else if (still) frame()
@@ -1272,7 +1285,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
                         const sb = (((cSrc + k + 1) % N) + N) % N
                         off +=
                             (widthAt(sa, slotH(sa)) + widthAt(sb, slotH(sb))) /
-                                2 +
+                            2 +
                             pp.gap
                     }
                 } else if (di < 0) {
@@ -1281,7 +1294,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
                         const sb = (((cSrc - k - 1) % N) + N) % N
                         off -=
                             (widthAt(sa, slotH(sa)) + widthAt(sb, slotH(sb))) /
-                                2 +
+                            2 +
                             pp.gap
                     }
                 }
@@ -1359,7 +1372,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
     }
 
     function updateCursor() {
-        if (entryActive || entrySettled) return setCursor("")
+        if (pp.entry.enabled && (entryActive || entrySettled)) return setCursor("")
 
         if (focusState.active) {
             return setCursor(hoverFocused ? "" : "zoom-out")
@@ -1389,7 +1402,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
     }
 
     function inputLocked() {
-        return focusState.active || entryActive || entrySettled
+        return focusState.active || (pp.entry.enabled && (entryActive || entrySettled))
     }
 
     function onWheel(e: WheelEvent) {
@@ -1414,7 +1427,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
         dragPointerType = e.pointerType || "mouse"
         try {
             el.setPointerCapture(e.pointerId)
-        } catch {}
+        } catch { }
         dragLastX = e.clientX
         lastPointerX = e.clientX - bounds.left
         lastPointerY = e.clientY - bounds.top
@@ -1464,7 +1477,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
         if (dragPointerId !== null) {
             try {
                 el.releasePointerCapture(dragPointerId)
-            } catch {}
+            } catch { }
             dragPointerId = null
         }
 
@@ -1544,6 +1557,11 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
 
         target = centerForIndex(nearestIndex(scroll))
 
+        // --- COMMUNICATION OUT ---
+        if (typeof onFocusChange === 'function') {
+            onFocusChange(panel.srcIndex)
+        }
+
         const focusX = lastCenterX[panel.poolIdx] || 0
         const others = pool
             .map((p, idx) => ({ idx, x: lastCenterX[idx] }))
@@ -1576,6 +1594,11 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
         closing = true
         const F = pp.focus
         if (focusTl) focusTl.kill()
+
+        // --- COMMUNICATION OUT ---
+        if (typeof onFocusChange === 'function') {
+            onFocusChange(-1)
+        }
 
         const focusX = lastCenterX[focusState.poolIdx] || 0
         const others = pool
@@ -1711,16 +1734,26 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
         if (entryTl) entryTl.step(dt)
         if (focusTl) focusTl.step(dt)
 
+        const isInteracting = dragging || (now - lastInput < pp.resumeDelay)
+        const isHoverPaused = pp.pauseOnHover && pointerInside && lastPointerType === "mouse"
+        const canAutoScroll = pp.autoScroll && !focusState.active && !isInteracting && !isHoverPaused && !entryActive
+
         if (!dragging) {
             target += velocity * f
             velocity *= Math.pow(pp.friction, f)
             if (Math.abs(velocity) < 0.05) velocity = 0
 
-            if (
+            if (canAutoScroll) {
+                const delta = pp.autoScrollSpeed * dt
+                target += delta
+                scroll += delta
+                snapped = false
+            } else if (
                 pp.snap &&
                 !snapped &&
                 !focusState.active &&
-                now - lastInput > pp.snapIdleMs
+                now - lastInput > pp.snapIdleMs &&
+                Math.abs(velocity) < 0.05
             ) {
                 target = centerForIndex(nearestIndex(scroll))
                 snapped = true
@@ -1731,8 +1764,8 @@ function createEngine(mount: HTMLElement, getParams: () => Params) {
             dragging && dragPointerType !== "mouse"
                 ? pp.touchEase
                 : snapped && !pendingFocus
-                  ? pp.snapEase
-                  : pp.ease
+                    ? pp.snapEase
+                    : pp.ease
         scroll += (target - scroll) * lerp(base)
 
         const rawSpeed = (scroll - prevScroll) / f
@@ -1908,7 +1941,8 @@ export default function LiquidGlassCarousel(props: LiquidGlassCarouselProps) {
         if (!container) return
         let engine: Engine | null = null
         try {
-            engine = createEngine(container, () => paramsRef.current)
+            // PASS THE PROP DOWN TO THE ENGINE
+            engine = createEngine(container, () => paramsRef.current, props.onFocusChange)
         } catch {
             return
         }
@@ -1917,7 +1951,7 @@ export default function LiquidGlassCarousel(props: LiquidGlassCarouselProps) {
             engineRef.current = null
             engine?.destroy()
         }
-    }, [])
+    }, []) // Make sure we pass the prop into the dependency array if we want it to update, but usually this is just instantiated once
 
     useEffect(() => {
         engineRef.current?.setItems(

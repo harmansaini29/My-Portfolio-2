@@ -12,15 +12,15 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       gsap.registerPlugin(ScrollTrigger);
     }
 
-    // Configure Lenis for ultra-smooth, slow, cinematic scrolling momentum
+    // Configure Lenis for ultra-responsive, silky smooth scrolling
     const lenis = new Lenis({
-      duration: 1.8, // Slightly longer duration for luxurious, slow cinematic feel
+      duration: 0.9, // Fast & crisp response — no dragging or heavy lag
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 0.85, // Smooth and deliberate speed
-      touchMultiplier: 1.2,
+      wheelMultiplier: 1.25, // Snappy response so single flick moves cleanly
+      touchMultiplier: 1.6,  // Fast on mobile
       infinite: false,
     });
 

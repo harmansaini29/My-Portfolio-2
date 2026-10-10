@@ -242,7 +242,14 @@ export const GooeyTextReveal = React.forwardRef<
           duration,
           ease,
           stagger,
-          onComplete,
+          onComplete: () => {
+            layers.forEach((l) => {
+              const el = l as HTMLElement;
+              el.style.filter = "none";
+              if (el.parentElement) el.parentElement.style.filter = "none";
+            });
+            if (onComplete) onComplete();
+          },
         };
 
         if (mode === "scrub") {

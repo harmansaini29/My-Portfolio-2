@@ -1,0 +1,263 @@
+/* components/VortexAbout.css */
+.sj-track {
+  position: relative !important;
+  width: 100%;
+  height: 260vh;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.sj-sticky {
+  position: sticky !important;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 10;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+}
+
+/* Full-Screen WebGL Vortex: Unrestricted Dimensions, Clean Pull, No Shadows */
+.sj-vortex-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+/* Real-Time WebGL Sobel Edge & FBM Noise Dissolve Overlay */
+.sj-dissolve-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+  z-index: 2;
+}
+
+.sj-dissolve-hud {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  text-align: center;
+  z-index: 30;
+}
+
+/* Professional Typography Left & Right Flank Containers */
+.sj-about-container,
+.sj-right-container {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(38vw, 480px);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.sj-about-container {
+  left: clamp(1.5rem, 5.5vw, 7rem);
+}
+
+.sj-right-container {
+  right: clamp(1.5rem, 5.5vw, 7rem);
+}
+
+.sj-text-flow {
+  position: relative;
+  width: 100%;
+  pointer-events: auto;
+  will-change: transform, opacity;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.75rem 2rem;
+  border-radius: 1.25rem;
+  background: radial-gradient(ellipse at 50% 40%, rgba(10, 15, 28, 0.72) 0%, rgba(3, 7, 18, 0.6) 80%, rgba(0, 0, 0, 0.35) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.sj-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sj-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sj-pulse-dot.cyan { background: #06b6d4; box-shadow: 0 0 8px #06b6d4; }
+.sj-pulse-dot.indigo { background: #818cf8; box-shadow: 0 0 8px #818cf8; }
+
+.sj-tag-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sj-heading {
+  font-size: clamp(1.8rem, 3.2vw, 2.75rem);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 0, 0, 0.6);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.sj-subheading {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.45;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 16px rgba(0, 0, 0, 0.9);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sj-paragraph {
+  font-size: clamp(0.82rem, 1.15vw, 0.92rem);
+  line-height: 1.7;
+  color: #f8fafc;
+  font-weight: 450;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 16px rgba(0, 0, 0, 0.75);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.sj-tech-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+}
+
+.sj-tech-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #f1f5f9;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sj-metrics-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+}
+
+.sj-metric-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scroll Hint */
+.sj-scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  z-index: 25;
+  pointer-events: none;
+}
+
+.sj-scroll-hint span {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.sj-mouse-icon {
+  width: 20px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  justify-content: center;
+  padding-top: 5px;
+  animation: sjFloat 2.4s ease-in-out infinite;
+}
+
+.sj-mouse-wheel {
+  width: 3px;
+  height: 6px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  animation: sjWheel 2.4s ease-in-out infinite;
+}
+
+@keyframes sjFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+@keyframes sjWheel {
+  0% { transform: translateY(0); opacity: 1; }
+  60% { transform: translateY(8px); opacity: 0; }
+  61%, 100% { transform: translateY(0); opacity: 0; }
+}
+
+@media (max-width: 960px) {
+  .sj-about-container,
+  .sj-right-container {
+    width: min(92vw, 460px);
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+  }
+  .sj-text-flow {
+    padding: 1.25rem 1.25rem;
+  }
+}

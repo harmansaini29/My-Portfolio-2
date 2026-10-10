@@ -19,31 +19,6 @@ html, body {
   overflow-x: clip;
 }
 
-/* Continuous S-Road Moving GIF Animations */
-.road-moving-dashes {
-  animation: roadDashMove 1.8s linear infinite !important;
-}
-@keyframes roadDashMove {
-  from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: -68; }
-}
-
-.road-photon-stream {
-  animation: roadPhotonMove 3.2s linear infinite !important;
-}
-@keyframes roadPhotonMove {
-  from { stroke-dashoffset: 1120; }
-  to { stroke-dashoffset: 0; }
-}
-
-/* Continuous 3D Cylinder Carousel Rotation */
-@keyframes cylinderRotate {
-  to { transform: rotateY(1turn); }
-}
-@keyframes ry {
-  to { transform: rotateY(1turn); }
-}
-
 /* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -59,49 +34,120 @@ html, body {
   background: #3f3f46;
 }
 
-/* Venomous Black Mercury Side Accents */
-.venom-mercury-side-left {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 65px;
-  background: linear-gradient(
-    90deg,
-    #000000 0%,
-    rgba(9, 9, 11, 0.95) 45%,
-    rgba(24, 24, 27, 0.35) 75%,
-    transparent 100%
-  );
-  box-shadow: inset 4px 0 20px rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-  z-index: 50;
-}
+/* =========================================================================
+   Chromium Profile Lighting Keyframes & GPU-Accelerated Utility Classes
+   ========================================================================= */
 
-.venom-mercury-side-right {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 65px;
-  background: linear-gradient(
-    270deg,
-    #000000 0%,
-    rgba(9, 9, 11, 0.95) 45%,
-    rgba(24, 24, 27, 0.35) 75%,
-    transparent 100%
-  );
-  box-shadow: inset -4px 0 20px rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-  z-index: 50;
-}
-
-@media (max-width: 768px) {
-  .venom-mercury-side-left,
-  .venom-mercury-side-right {
-    width: 25px;
+@keyframes chromiumBeamRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
+
+@keyframes chromiumHaloPulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.995);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.005);
+  }
+}
+
+@keyframes specularSheenSweep {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+  }
+  40%, 100% {
+    transform: translateX(250%) skewX(-25deg);
+  }
+}
+
+/* GPU-Accelerated Profile Lighting Utilities */
+.animate-chromium-beam {
+  animation: chromiumBeamRotate 8s linear infinite;
+  will-change: transform;
+}
+
+.animate-chromium-halo {
+  animation: chromiumHaloPulse 4s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.animate-specular-sheen {
+  animation: specularSheenSweep 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+/* Conic Specular Chromium Gradient for the Profile Edge Beam */
+.bg-chromium-conic-beam {
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.15) 35deg,
+    rgba(255, 255, 255, 0.95) 55deg,
+    rgba(6, 182, 212, 0.9) 70deg,
+    rgba(255, 255, 255, 0.4) 90deg,
+    transparent 130deg,
+    rgba(255, 255, 255, 0.1) 215deg,
+    rgba(255, 255, 255, 0.95) 235deg,
+    rgba(6, 182, 212, 0.85) 250deg,
+    rgba(255, 255, 255, 0.3) 270deg,
+    transparent 360deg
+  );
+}
+
+/* Specular Metallic Linear Bezel Gradient */
+.bg-chromium-bezel {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(148, 163, 184, 0.35) 20%,
+    rgba(30, 41, 59, 0.6) 40%,
+    rgba(15, 23, 42, 0.9) 60%,
+    rgba(6, 182, 212, 0.6) 80%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+}
+
+/* =========================================================================
+   Infinite Marquee Animations — Tech Stack Dual Carousel
+   ========================================================================= */
+
+/* Width of a single full set of chips. Calculated so translate=-100% means 
+   exactly one full repeat width. With 10 chips × ~160px each ≈ 1600px. 
+   We define the animation in px to match the actual DOM width. */
+@keyframes marqueeLeft {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.3333%); }
+}
+
+@keyframes marqueeRight {
+  0%   { transform: translateX(-33.3333%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-marquee-left {
+  animation: marqueeLeft 12s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-right {
+  animation: marqueeRight 12s linear infinite;
+  will-change: transform;
+}
+
+/* Pause on hover for accessibility */
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}
+
+
 
 @theme inline {
   --font-heading: var(--font-sans);

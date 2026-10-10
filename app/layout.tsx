@@ -36,7 +36,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("bg-black", "text-white", "antialiased", jakarta.variable, "font-sans", geist.variable)}
+      className={cn("dark", "bg-black", "text-white", "antialiased", jakarta.variable, "font-sans", geist.variable)}
     >
       <body className="min-h-screen bg-black overflow-x-hidden" suppressHydrationWarning>
         <SmoothScroll>

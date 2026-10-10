@@ -26,6 +26,7 @@ export interface MosaicFlipProps {
     hover?: number
     size?: number
     style?: CSSProperties
+    onSlideChange?: (index: number) => void
 }
 
 const DEFAULTS = {
@@ -199,6 +200,7 @@ function __OriginkitBase_MosaicFlip({
     hover = DEFAULTS.hover,
     size = DEFAULTS.size,
     style,
+    onSlideChange,
 }: MosaicFlipProps) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const tileRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -369,12 +371,13 @@ function __OriginkitBase_MosaicFlip({
         revealingRef.current = true
         queuedRef.current = null
         activeRef.current = index
+        if (onSlideChange) onSlideChange(index)
         setPhase((current) => ({
             count: current.count + 1,
             active: index,
             previous: current.active,
         }))
-    }, [])
+    }, [onSlideChange])
     revealRef.current = reveal
 
     const advance = useCallback(() => {

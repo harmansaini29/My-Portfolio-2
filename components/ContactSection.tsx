@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import imagesLoaded from 'imagesloaded'
 import { cn } from '@/lib/utils'
 import { FaGithub, FaSlack, FaTwitter } from 'react-icons/fa'
+import { SOCIAL_LINKS } from '@/lib/portfolio-data'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -16,6 +17,7 @@ export interface BentoItem {
   icon: React.ReactNode
   content?: React.ReactNode
   image?: string
+  href?: string
 }
 
 export interface StaggeredGridProps {
@@ -38,18 +40,39 @@ const DEFAULT_IMAGES = [
 ];
 
 const DEFAULT_BENTO_ITEMS: BentoItem[] = [
-  { id: 1, title: 'Let\'s talk', subtitle: 'Contact me', description: 'Get in touch for opportunities', icon: <FaSlack /> },
-  { id: 2, title: 'Follow me', subtitle: 'Socials', description: 'Stay updated with my work', icon: <FaTwitter /> },
-  { id: 3, title: 'Open Source', subtitle: 'GitHub', description: 'Check out my code', icon: <FaGithub /> }
+  {
+    id: 1,
+    title: SOCIAL_LINKS.email.label || "Let's talk",
+    subtitle: 'Contact me',
+    description: 'Get in touch for opportunities',
+    icon: <FaSlack />,
+    href: SOCIAL_LINKS.email.url,
+  },
+  {
+    id: 2,
+    title: SOCIAL_LINKS.twitter.label || "Socials",
+    subtitle: SOCIAL_LINKS.twitter.handle,
+    description: 'Stay updated with my work',
+    icon: <FaTwitter />,
+    href: SOCIAL_LINKS.twitter.url,
+  },
+  {
+    id: 3,
+    title: SOCIAL_LINKS.github.label || "GitHub",
+    subtitle: 'Open Source',
+    description: 'Check out my code',
+    icon: <FaGithub />,
+    href: SOCIAL_LINKS.github.url,
+  }
 ];
 
 export function StaggeredGrid({
   images = DEFAULT_IMAGES,
   bentoItems = DEFAULT_BENTO_ITEMS,
-  centerText = "Halcyon",
+  centerText = "HARMAN SAINI",
   credits = {
-    madeBy: { text: "@codrops", href: "https://x.com/codrops" },
-    moreDemos: { text: "More demos", href: "https://tympanus.net/codrops/demos" }
+    madeBy: { text: SOCIAL_LINKS.github.name, href: SOCIAL_LINKS.github.url },
+    moreDemos: { text: SOCIAL_LINKS.linkedin.name, href: SOCIAL_LINKS.linkedin.url }
   },
   className,
   showFooter = true,
@@ -199,7 +222,7 @@ export function StaggeredGrid({
       </section>
 
       <section className="grid place-items-center w-full relative">
-        <div ref={gridFullRef} className="grid--full relative w-full my-[10vh] h-auto aspect-[1.1] max-w-none p-4 grid gap-4 grid-cols-7 grid-rows-5">
+        <div ref={gridFullRef} className="grid--full relative w-full mt-[4vh] mb-8 pb-4 h-auto aspect-[1.8] max-w-none p-4 grid gap-4 grid-cols-7 grid-rows-3">
           <div className="grid-overlay absolute inset-0 z-[15] pointer-events-none opacity-0 bg-white/80 dark:bg-black/80 rounded-lg transition-opacity duration-500" />
           {mixedGridItems.map((item, i) => {
             if (item === 'BENTO_GROUP') {
@@ -221,7 +244,17 @@ export function StaggeredGrid({
                         )}
                         style={{ width: isActive ? "60%" : "20%" }}
                         onMouseEnter={() => setActiveBento(index)}
-                        onClick={() => setActiveBento(index)}
+                        onClick={() => {
+                          if (isActive && bentoItem.href) {
+                            if (bentoItem.href.startsWith('mailto:')) {
+                              window.location.href = bentoItem.href;
+                            } else {
+                              window.open(bentoItem.href, '_blank', 'noopener,noreferrer');
+                            }
+                          } else {
+                            setActiveBento(index);
+                          }
+                        }}
                       >
                         {/* Border Overlay - Fixes edge artifacts by sitting on top */}
                         <div className={cn(
@@ -320,9 +353,15 @@ export function StaggeredGrid({
       </section >
 
       {showFooter && (
-        <footer className="frame__footer w-full p-8 flex justify-between items-center relative z-50 text-neutral-900 dark:text-white uppercase font-medium text-xs tracking-wider">
-          <a href={credits.madeBy.href} className="hover:opacity-60 transition-opacity">{credits.madeBy.text}</a>
-          <a href={credits.moreDemos.href} className="hover:opacity-60 transition-opacity">{credits.moreDemos.text}</a>
+        <footer className="w-full pt-4 pb-6 px-8 flex flex-col sm:flex-row justify-between items-center gap-4 relative z-50 text-neutral-400 text-xs tracking-wider border-t border-white/5">
+          <span>&copy; {new Date().getFullYear()} Harman Saini. All Rights Reserved.</span>
+          <div className="flex items-center gap-5">
+            <a href={SOCIAL_LINKS.github.url} target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">GitHub</a>
+            <a href={SOCIAL_LINKS.linkedin.url} target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">LinkedIn</a>
+            <a href={SOCIAL_LINKS.twitter.url} target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">Twitter</a>
+            <a href={SOCIAL_LINKS.email.url} className="hover:text-cyan-400 transition-colors">Email</a>
+          </div>
+          <span className="text-cyan-400/80 font-mono">Designed &amp; Developed with Precision</span>
         </footer>
       )}
     </div >

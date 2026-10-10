@@ -344,44 +344,37 @@ const __originkitPresetProps = {
   "items": {
     "itemCount": 5,
     "item1": {
-      "text": "NEW SEASON DROP",
+      "text": "SPEAKER SESSIONS",
       "image": {
-        "src": "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/8e0d22a8-ac82-4893-90d8-3403f80ec600/w=800"
+        "src": "https://placehold.co/800x600/1e293b/38bdf8?text=2%C3%97+Hackathon+Winner"
       },
       "link": ""
     },
     "item2": {
-      "text": "ESSENTIAL COLLECTION",
+      "text": "GROWSPHERE x KAFKA",
       "image": {
-        "src": "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/d6af07a0-4dc5-4de4-07b1-9d2ad6100000/w=800"
+        "src": "https://placehold.co/800x600/1e293b/38bdf8?text=Ghost+Mode"
       },
       "link": ""
     },
     "item3": {
-      "text": "SUMMER EDITION",
+      "text": "NEAR LEGION AI",
       "image": {
-        "src": "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/c083d83a-f5a4-4434-989f-4eaa9bbe7500/w=800"
+        "src": "https://placehold.co/800x600/1e293b/38bdf8?text=ENIGMA+Top+10"
       },
       "link": ""
     },
     "item4": {
-      "text": "STREET ICONS",
+      "text": "GROWSPHERE x ROAD TO DEVCON",
       "image": {
-        "src": "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/93bad0e0-e2ab-4e21-de9c-4cb54b028f00/w=800"
+        "src": "https://placehold.co/800x600/1e293b/38bdf8?text=HackNova+7th"
       },
       "link": ""
     },
     "item5": {
-      "text": "PREMIUM DENIM",
+      "text": "NPTEL ELITE GOLD",
       "image": {
-        "src": "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/09a59a65-3c07-4500-f72c-68c824168c00/w=800"
-      },
-      "link": ""
-    },
-    "item6": {
-      "text": "ARCHIVE PIECES",
-      "image": {
-        "src": "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/8e0d22a8-ac82-4893-90d8-3403f80ec600/w=800"
+        "src": "https://placehold.co/800x600/1e293b/38bdf8?text=NPTEL+Elite+Gold"
       },
       "link": ""
     }
