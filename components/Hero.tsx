@@ -28,6 +28,7 @@ export default function Hero({
   hint = 'Move cursor to reveal'
 }: HeroProps) {
   const heroRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const imgTopRef = useRef<HTMLDivElement>(null);
   const imgBottomRef = useRef<HTMLImageElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -99,8 +100,13 @@ export default function Hero({
     window.addEventListener('scroll', onScroll, { passive: true });
 
     // Pointer mask loop
-    let w = hero.clientWidth, h = hero.clientHeight;
-    const onResize = () => { w = hero.clientWidth; h = hero.clientHeight; };
+    let w = stageRef.current ? stageRef.current.clientWidth : hero.clientWidth;
+    let h = stageRef.current ? stageRef.current.clientHeight : hero.clientHeight;
+    const onResize = () => {
+      const s = stageRef.current || hero;
+      w = s.clientWidth;
+      h = s.clientHeight;
+    };
     window.addEventListener('resize', onResize, { passive: true });
 
     const target = { x: w * .5, y: h * .5 }, head = { x: w * .5, y: h * .5 }, lag = { x: w * .5, y: h * .5 };
@@ -115,9 +121,12 @@ export default function Hero({
     }
 
     function ptr(e: PointerEvent) {
-      const r = hero!.getBoundingClientRect();
-      target.x = e.clientX - r.left;
-      target.y = e.clientY - r.top;
+      const stage = stageRef.current || hero;
+      if (!stage) return;
+      const r = stage.getBoundingClientRect();
+      const stageScale = r.width / (stage.clientWidth || 1);
+      target.x = (e.clientX - r.left) / (stageScale || 1);
+      target.y = (e.clientY - r.top) / (stageScale || 1);
       active = true;
       lastPtr = performance.now();
       targetR = 38;
@@ -196,41 +205,43 @@ export default function Hero({
 
   return (
     <div className="hero" id="hero" ref={heroRef}>
-      <img
-        className="layerChrome"
-        id="imgBottom"
-        src={baseSrc}
-        alt=""
-        ref={imgBottomRef}
-        draggable={false}
-        data-fit="cover"
-        data-position="top"
-      />
-      
-      <div className="layerBase" id="imgTop" ref={imgTopRef}>
+      <div className="hero-stage" ref={stageRef}>
         <img
-          className={activeIdx === 0 ? "isActive" : ""}
-          style={{ translate: "0% 0%", scale: "1", transformOrigin: "50% 0%" }}
-          src={portraitSrc}
-          alt={activeIdx === 0 ? "Portrait" : ""}
-          aria-hidden={activeIdx !== 0}
+          className="layerChrome"
+          id="imgBottom"
+          src={baseSrc}
+          alt=""
+          ref={imgBottomRef}
           draggable={false}
           data-fit="cover"
           data-position="top"
         />
-        <img
-          className={activeIdx === 1 ? "isActive" : ""}
-          style={{ translate: "0% 0%", scale: "1", transformOrigin: "50% 0%" }}
-          src={chromeSrc}
-          alt={activeIdx === 1 ? "Younger portrait" : ""}
-          aria-hidden={activeIdx !== 1}
-          draggable={false}
-          data-fit="cover"
-          data-position="top"
-        />
+        
+        <div className="layerBase" id="imgTop" ref={imgTopRef}>
+          <img
+            className={activeIdx === 0 ? "isActive" : ""}
+            style={{ translate: "0% 0%", scale: "1", transformOrigin: "50% 0%" }}
+            src={portraitSrc}
+            alt={activeIdx === 0 ? "Portrait" : ""}
+            aria-hidden={activeIdx !== 0}
+            draggable={false}
+            data-fit="cover"
+            data-position="top"
+          />
+          <img
+            className={activeIdx === 1 ? "isActive" : ""}
+            style={{ translate: "0% 0%", scale: "1", transformOrigin: "50% 0%" }}
+            src={chromeSrc}
+            alt={activeIdx === 1 ? "Younger portrait" : ""}
+            aria-hidden={activeIdx !== 1}
+            draggable={false}
+            data-fit="cover"
+            data-position="top"
+          />
+        </div>
+        
+        <div className="glow" id="glow" ref={glowRef}></div>
       </div>
-      
-      <div className="glow" id="glow" ref={glowRef}></div>
 
       <div className="tele l" aria-hidden="true">
         <div className="tele-line"></div>

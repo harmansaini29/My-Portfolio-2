@@ -42,34 +42,34 @@ const DEFAULT_IMAGES = [
 const DEFAULT_BENTO_ITEMS: BentoItem[] = [
   {
     id: 1,
-    title: SOCIAL_LINKS.email.label || "Let's talk",
-    subtitle: 'Contact me',
+    title: 'Email',
+    subtitle: SOCIAL_LINKS.email.label || "Let's talk",
     description: 'Get in touch for opportunities',
-    icon: <FaEnvelope />,
+    icon: <FaEnvelope className="w-4 h-4 sm:w-5 sm:h-5" />,
     href: SOCIAL_LINKS.email.url,
   },
   {
     id: 2,
-    title: SOCIAL_LINKS.linkedin.label || "LinkedIn",
-    subtitle: SOCIAL_LINKS.linkedin.handle,
+    title: 'LinkedIn',
+    subtitle: SOCIAL_LINKS.linkedin.handle || 'Harman Saini',
     description: 'Professional network & collaborations',
-    icon: <FaLinkedin />,
+    icon: <FaLinkedin className="w-4 h-4 sm:w-5 sm:h-5" />,
     href: SOCIAL_LINKS.linkedin.url,
   },
   {
     id: 3,
-    title: SOCIAL_LINKS.twitter.label || "Socials",
-    subtitle: SOCIAL_LINKS.twitter.handle,
+    title: 'Twitter',
+    subtitle: SOCIAL_LINKS.twitter.handle || '@harman',
     description: 'Stay updated with my work',
-    icon: <FaTwitter />,
+    icon: <FaTwitter className="w-4 h-4 sm:w-5 sm:h-5" />,
     href: SOCIAL_LINKS.twitter.url,
   },
   {
     id: 4,
-    title: SOCIAL_LINKS.github.label || "GitHub",
+    title: 'GitHub',
     subtitle: 'Open Source',
     description: 'Check out my code',
-    icon: <FaGithub />,
+    icon: <FaGithub className="w-4 h-4 sm:w-5 sm:h-5" />,
     href: SOCIAL_LINKS.github.url,
   }
 ];
@@ -230,7 +230,7 @@ export function StaggeredGrid({
       </section>
 
       <section className="grid place-items-center w-full relative">
-        <div ref={gridFullRef} className="grid--full relative w-full mt-[4vh] mb-8 pb-4 h-auto aspect-[1.8] max-w-none p-4 grid gap-4 grid-cols-7 grid-rows-3">
+        <div ref={gridFullRef} className="grid--full relative w-full mt-[4vh] mb-8 pb-4 h-auto min-h-[280px] sm:aspect-[1.8] max-w-none p-2 sm:p-4 grid gap-2 sm:gap-3 md:gap-4 grid-cols-7 grid-rows-3 overflow-hidden">
           <div className="grid-overlay absolute inset-0 z-[15] pointer-events-none opacity-0 bg-white/80 dark:bg-black/80 rounded-lg transition-opacity duration-500" />
           {mixedGridItems.map((item, i) => {
             if (item === 'BENTO_GROUP') {
@@ -250,7 +250,7 @@ export function StaggeredGrid({
                             ? "bg-zinc-900/10 shadow-2xl"
                             : "bg-zinc-950"
                         )}
-                        style={{ width: isActive ? (bentoItems.length === 4 ? "52%" : "60%") : (bentoItems.length === 4 ? "16%" : "20%") }}
+                        style={{ width: isActive ? (bentoItems.length === 4 ? "46%" : "60%") : (bentoItems.length === 4 ? "18%" : "20%") }}
                         onMouseEnter={() => setActiveBento(index)}
                         onClick={() => {
                           if (isActive && bentoItem.href) {
@@ -295,28 +295,31 @@ export function StaggeredGrid({
                             </div>
 
                             {/* Footer Row - Full Width with Shadow */}
-                            <div className="absolute bottom-0 left-0 w-full h-20 flex items-center justify-between px-5 z-20">
-
-
-                              <div className="flex flex-col relative z-10">
-                                <h3 className="text-sm font-bold text-white drop-shadow-md leading-none tracking-tight">{bentoItem.title}</h3>
+                            <div className="absolute bottom-0 left-0 w-full h-16 sm:h-20 flex items-center justify-between px-3 sm:px-5 z-20">
+                              <div className="flex flex-col relative z-10 max-w-[70%] overflow-hidden">
+                                <h3 className="text-xs sm:text-sm font-bold text-white drop-shadow-md leading-tight tracking-tight truncate">{bentoItem.title}</h3>
+                                {bentoItem.subtitle && (
+                                  <span className="text-[10px] sm:text-xs text-white/80 drop-shadow truncate">{bentoItem.subtitle}</span>
+                                )}
                               </div>
-                              <div className="text-white/90 transition-colors hover:text-white drop-shadow-md relative z-10">
+                              <div className="text-white/90 transition-colors hover:text-white drop-shadow-md relative z-10 text-sm sm:text-lg flex-shrink-0">
                                 {bentoItem.icon}
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Inactive State - Icon + Title - Centered */}
+                        {/* Inactive State - Icon + Title - Centered cleanly */}
                         <div className={cn(
-                          "absolute inset-0 flex flex-col items-center justify-center gap-2 transition-all duration-500",
+                          "absolute inset-0 flex flex-col items-center justify-center gap-1 sm:gap-1.5 p-1 transition-all duration-500 overflow-hidden",
                           isActive ? "opacity-0 scale-90 pointer-events-none" : "opacity-100 scale-100"
                         )}>
-                          <div className="text-white/50 group-hover:text-white transition-colors">
+                          <div className="text-white/60 group-hover:text-white transition-colors text-sm sm:text-base flex-shrink-0">
                             {bentoItem.icon}
                           </div>
-                          <span className="text-[10px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors uppercase tracking-wider">{bentoItem.title}</span>
+                          <span className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-zinc-400 group-hover:text-zinc-200 transition-colors uppercase tracking-wider truncate max-w-[90%] text-center">
+                            {bentoItem.title}
+                          </span>
                         </div>
                       </div>
                     )
@@ -334,21 +337,21 @@ export function StaggeredGrid({
               const label = i % 4 === 0 ? "Github" : i % 4 === 1 ? "LinkedIn" : i % 4 === 2 ? "Twitter" : "Email";
 
               return (
-                <figure key={`img-${i}`} data-col={i % 7} className="grid__item m-0 relative z-10 [perspective:800px] will-change-[transform,opacity] group cursor-pointer">
-                  <div className="grid__item-img w-full h-full [backface-visibility:hidden] will-change-transform rounded-xl overflow-hidden shadow-sm border border-zinc-200 dark:border-zinc-900 bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-105 group-hover:shadow-xl group-hover:border-transparent">
+                <figure key={`img-${i}`} data-col={i % 7} className="grid__item m-0 relative z-10 [perspective:800px] will-change-[transform,opacity] group cursor-pointer overflow-hidden rounded-xl">
+                  <div className="grid__item-img w-full h-full min-h-[64px] sm:min-h-[80px] [backface-visibility:hidden] will-change-transform rounded-xl overflow-hidden shadow-sm border border-zinc-200 dark:border-zinc-800/80 bg-zinc-950 flex items-center justify-center p-2 transition-all duration-500 ease-out group-hover:scale-105 group-hover:shadow-xl group-hover:border-cyan-500/40">
 
                     {/* Gradient Overlay for Hover */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/80 to-black backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/80 to-black backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0 pointer-events-none" />
 
                     {/* Content Container */}
-                    <div className="relative z-10 flex flex-col items-center justify-center gap-3">
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-1 sm:gap-1.5 w-full max-w-full px-1">
                       {/* Icon */}
-                      <Icon className="w-8 h-8 text-zinc-400 dark:text-zinc-500 transition-all duration-300 group-hover:text-white group-hover:scale-110" />
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-zinc-400 dark:text-zinc-500 transition-all duration-300 group-hover:text-cyan-400 group-hover:scale-110 flex-shrink-0" />
 
                       {/* Text Reveal */}
-                      <div className="text-center opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-75">
-                        <span className="block text-[10px] font-medium text-white/90 uppercase tracking-wider mb-0.5">Build with</span>
-                        <span className="block text-sm font-bold text-white tracking-tight">{label}</span>
+                      <div className="text-center opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0 transition-all duration-300 delay-75 max-w-full overflow-hidden">
+                        <span className="block text-[8px] sm:text-[9px] font-medium text-white/70 uppercase tracking-wider truncate leading-tight">Build with</span>
+                        <span className="block text-[11px] sm:text-xs font-bold text-white tracking-tight truncate leading-tight">{label}</span>
                       </div>
                     </div>
                   </div>

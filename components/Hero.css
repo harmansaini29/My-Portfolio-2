@@ -312,8 +312,20 @@
   50% { opacity: .85; }
 }
 
+.hero-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 @media (max-width: 768px) {
   .tele { display: none; }
+  .hero-stage {
+    transform-origin: 50% 26%;
+    transform: scale(0.82);
+  }
   .bottom-left-section {
     bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
     left: max(1.2rem, env(safe-area-inset-left, 1.2rem));

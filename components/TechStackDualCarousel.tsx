@@ -36,19 +36,21 @@ interface TechChipProps {
 
 function TechChip({ name, icon }: TechChipProps) {
   return (
-    <div className="relative overflow-hidden flex-shrink-0 flex items-center gap-6 mx-6 px-10 py-5 rounded-2xl bg-white/[0.04] border border-white/[0.12] backdrop-blur-md hover:bg-white/[0.08] hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300 group cursor-default select-none">
+    <div className="relative overflow-hidden flex-shrink-0 flex items-center gap-3 sm:gap-3.5 mx-2 sm:mx-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.12] backdrop-blur-md hover:bg-white/[0.08] hover:border-cyan-500/50 hover:shadow-[0_0_16px_rgba(6,182,212,0.3)] transition-all duration-300 group cursor-default select-none">
       {/* Shine effect */}
       <div className="absolute inset-0 -translate-x-[150%] skew-x-12 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out z-0" />
-      {/* Symbol / Icon */}
-      <img
-        src={icon}
-        alt={name}
-        width={48}
-        height={48}
-        className="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-300 relative z-10"
-        loading="lazy"
-      />
-      <span className="text-xl font-bold text-slate-300 group-hover:text-white transition-colors tracking-wide whitespace-nowrap relative z-10">
+      {/* Cube Symbol Badge */}
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/[0.07] border border-white/10 flex items-center justify-center p-1.5 flex-shrink-0 relative z-10 group-hover:scale-110 transition-transform duration-300">
+        <img
+          src={icon}
+          alt={name}
+          width={24}
+          height={24}
+          className="w-full h-full object-contain"
+          loading="lazy"
+        />
+      </div>
+      <span className="text-xs sm:text-sm font-semibold text-slate-300 group-hover:text-white transition-colors tracking-wide whitespace-nowrap relative z-10">
         {name}
       </span>
     </div>
@@ -61,17 +63,17 @@ const ITEMS2 = [...ROW2, ...ROW2, ...ROW2];
 
 export default function TechStackDualCarousel() {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-16 overflow-hidden px-0 mt-32 pt-16 pb-16">
+    <div className="w-full flex flex-col items-center justify-center gap-6 sm:gap-8 overflow-hidden px-0 py-8 sm:py-12 my-6 sm:my-8">
       {/* Section title */}
       <div className="text-center pointer-events-none z-10 px-4">
         <h2
-          className="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-widest uppercase"
+          className="text-2xl sm:text-3xl md:text-5xl font-bold text-white tracking-widest uppercase"
           style={{ textShadow: '0 0 25px rgba(6, 182, 212, 0.55)' }}
         >
           Tech Stack
         </h2>
-        <p className="text-xs sm:text-sm text-cyan-400/70 font-mono tracking-widest mt-2 uppercase">
-          Tools & Technologies I Work With
+        <p className="text-[0.65rem] sm:text-xs text-cyan-400/70 font-mono tracking-widest mt-1.5 uppercase">
+          Tools &amp; Technologies I Work With
         </p>
       </div>
 

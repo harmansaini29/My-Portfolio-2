@@ -19,15 +19,16 @@ export default function AchievementsSection() {
         </p>
       </div>
 
-      <div className="w-full h-[70vh] flex items-center justify-center">
+      <div className="w-full min-h-[65vh] flex items-center justify-center">
         <HoverImageReveal
           items={ACHIEVEMENTS_DATA}
           backgroundColor="transparent"
           font={{
-            fontSize: "clamp(1.15rem, 4.2vw, 3.2rem)",
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
+            fontSize: "clamp(1.6rem, 5.5vw, 4.2rem)",
+            fontWeight: 800,
+            letterSpacing: "-0.025em",
             textAlign: "center",
+            lineHeight: "1.15em",
           }}
         />
       </div>

@@ -147,12 +147,12 @@ html, body {
 }
 
 .animate-marquee-left {
-  animation: marqueeLeft 12s linear infinite;
+  animation: marqueeLeft 9s linear infinite;
   will-change: transform;
 }
 
 .animate-marquee-right {
-  animation: marqueeRight 12s linear infinite;
+  animation: marqueeRight 9s linear infinite;
   will-change: transform;
 }
 

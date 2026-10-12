@@ -1375,7 +1375,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
         if (pp.entry.enabled && (entryActive || entrySettled)) return setCursor("")
 
         if (focusState.active) {
-            return setCursor(hoverFocused ? "" : "zoom-out")
+            return setCursor("zoom-out")
         }
         if (dragging) return setCursor("grabbing")
         if (!hoverPanel) return setCursor("")
@@ -1519,11 +1519,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
         }
 
         if (focusState.active) {
-            const on = panelAtPointer(
-                e.clientX - bounds.left,
-                e.clientY - bounds.top
-            )
-            if (!on || on.poolIdx !== focusState.poolIdx) closeFocus()
+            closeFocus()
             return
         }
         if (inputLocked()) return
