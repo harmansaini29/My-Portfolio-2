@@ -58,9 +58,20 @@ export default function Hero({
     // Visibility
     let inView = true;
     let observer: IntersectionObserver | null = null;
+    let last = performance.now();
+    let rafId: number = 0;
+
     if ('IntersectionObserver' in window) {
       observer = new IntersectionObserver((e) => {
-        inView = e[0].isIntersecting;
+        const visible = e[0].isIntersecting;
+        const wasVisible = inView;
+        inView = visible;
+        if (!wasVisible && visible && !reduce) {
+          last = performance.now();
+          if (!rafId) {
+            rafId = requestAnimationFrame(frame);
+          }
+        }
       }, { threshold: .05 });
       observer.observe(hero);
     }
@@ -123,12 +134,9 @@ export default function Hero({
       hero.addEventListener(n, onPtrEnd, { passive: true });
     });
 
-    let last = performance.now();
-    let rafId: number;
-
     function frame(now: number) {
       if (!inView) {
-        rafId = requestAnimationFrame(frame);
+        rafId = 0;
         return;
       }
       const dt = Math.min(36, now - last) / 1000;

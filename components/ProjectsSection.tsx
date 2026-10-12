@@ -37,13 +37,13 @@ export default function ProjectsSection() {
           activeProjectIndex={activeProject}
           totalProjects={PROJECT_DATA.length}
         >
-          {/* MosaicFlip takes full inner space */}
+          {/* MosaicFlip takes full inner space covering entire rectangle with cube effect */}
           <MosaicFlip
             images={projectItems}
             background="transparent"
             size={100}
-            columns={8}
             rows={8}
+            autoCover={true}
             speed={10}
             stagger={1.5}
             onSlideChange={setActiveProject}
@@ -60,7 +60,7 @@ export default function ProjectsSection() {
                 transition={{ duration: 0.22 }}
                 className="absolute bottom-0 left-0 right-0 z-30 pointer-events-none"
               >
-                <div className="mx-2 sm:mx-4 mb-2 sm:mb-3 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-black/75 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                <div className="mx-2 sm:mx-4 mr-14 sm:mr-16 mb-2 sm:mb-3 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex flex-col gap-0.5 sm:gap-1 flex-1 min-w-0">
                       <h3 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-wide uppercase truncate">

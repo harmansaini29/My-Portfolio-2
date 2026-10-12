@@ -763,7 +763,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
     el.style.top = "0"
     el.style.display = "block"
 
-    el.style.touchAction = "none"
+    el.style.touchAction = "pan-y"
     el.style.userSelect = "none"
     el.style.setProperty("-webkit-user-select", "none")
     el.style.setProperty("-webkit-touch-callout", "none")
@@ -1824,7 +1824,9 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
         })
     }
 
+    let inViewport = true
     function tick(t: number) {
+        if (!inViewport) return
         raf = requestAnimationFrame(tick)
         const dt = Math.min(0.05, Math.max(0, (t - lastT) / 1000))
         lastT = t
@@ -1854,6 +1856,19 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
     })
     ro.observe(mount)
 
+    const io = new IntersectionObserver(([entry]) => {
+        const visible = entry?.isIntersecting ?? true
+        if (!inViewport && visible) {
+            inViewport = true
+            lastT = performance.now()
+            raf = requestAnimationFrame(tick)
+        } else if (!visible) {
+            inViewport = false
+            cancelAnimationFrame(raf)
+        }
+    }, { threshold: 0.02 })
+    io.observe(mount)
+
     if (!still) {
         el.addEventListener("wheel", onWheel, { passive: false })
         el.addEventListener("pointerdown", onPointerDown)
@@ -1864,7 +1879,6 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
         el.addEventListener("pointerleave", onLeave)
         el.addEventListener("click", onClick)
         window.addEventListener("keydown", onKeyDown)
-        window.addEventListener("scroll", readBounds, { passive: true })
         window.addEventListener("resize", readBounds)
         raf = requestAnimationFrame(tick)
     }
@@ -1875,6 +1889,7 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
         if (frameReq) cancelAnimationFrame(frameReq)
         cancelAnimationFrame(raf)
         ro.disconnect()
+        io.disconnect()
         el.removeEventListener("wheel", onWheel)
         el.removeEventListener("pointerdown", onPointerDown)
         el.removeEventListener("pointermove", onPointerMove)
@@ -1884,7 +1899,6 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
         el.removeEventListener("pointerleave", onLeave)
         el.removeEventListener("click", onClick)
         window.removeEventListener("keydown", onKeyDown)
-        window.removeEventListener("scroll", readBounds)
         window.removeEventListener("resize", readBounds)
         if (focusTl) focusTl.kill()
         if (entryTl) entryTl.kill()

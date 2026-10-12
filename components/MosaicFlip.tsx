@@ -18,6 +18,7 @@ export interface MosaicFlipProps {
     background?: string
     columns?: number
     rows?: number
+    autoCover?: boolean
     gap?: number
     speed?: number
     stagger?: number
@@ -192,6 +193,7 @@ function __OriginkitBase_MosaicFlip({
     background = DEFAULTS.background,
     columns = DEFAULTS.columns,
     rows = DEFAULTS.rows,
+    autoCover = true,
     gap = DEFAULTS.gap,
     speed = DEFAULTS.speed,
     stagger = DEFAULTS.stagger,
@@ -263,22 +265,34 @@ function __OriginkitBase_MosaicFlip({
     const revealingRef = useRef(false)
     const queuedRef = useRef<number | null>(null)
 
-    const columnCount = Math.max(1, Math.round(columns))
-    const rowCount = Math.max(1, Math.round(rows))
-    const tileCount = columnCount * rowCount
-
     const frameWidth = frameSize.width || FALLBACK_FRAME.width
     const frameHeight = frameSize.height || FALLBACK_FRAME.height
 
-    const sizeScale = clamp(size ?? DEFAULTS.size, 10, 100) / 100
-    const baseTile = Math.max(
-        1,
-        Math.min(
-            (frameWidth - gap * (columnCount - 1)) / columnCount,
-            (frameHeight - gap * (rowCount - 1)) / rowCount
+    const isMobile = frameWidth < 640
+    const defaultRows = isMobile ? 6 : (rows ? Math.max(1, Math.round(rows)) : 8)
+    const rowCount = Math.max(1, defaultRows)
+
+    const frameAspect = frameWidth > 0 && frameHeight > 0 ? frameWidth / frameHeight : 16 / 10
+    const columnCount = autoCover
+        ? Math.max(4, Math.ceil(rowCount * frameAspect))
+        : Math.max(1, Math.round(columns ?? DEFAULTS.columns))
+    const tileCount = columnCount * rowCount
+
+    const sizeScale = autoCover ? 1 : clamp(size ?? DEFAULTS.size, 10, 100) / 100
+
+    const tileWidthUnit = (frameWidth - gap * (columnCount - 1)) / columnCount
+    const tileHeightUnit = (frameHeight - gap * (rowCount - 1)) / rowCount
+
+    const baseTile = autoCover
+        ? Math.max(tileWidthUnit, tileHeightUnit)
+        : Math.max(
+            1,
+            Math.min(
+                tileWidthUnit,
+                tileHeightUnit
+            )
         )
-    )
-    const tile = baseTile
+    const tile = Math.max(1, baseTile)
     const half = tile / 2
     const sheetWidth = columnCount * tile
     const sheetHeight = rowCount * tile

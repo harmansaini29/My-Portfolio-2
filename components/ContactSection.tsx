@@ -4,7 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import imagesLoaded from 'imagesloaded'
 import { cn } from '@/lib/utils'
-import { FaGithub, FaSlack, FaTwitter } from 'react-icons/fa'
+import { FaGithub, FaTwitter, FaLinkedin, FaEnvelope } from 'react-icons/fa'
 import { SOCIAL_LINKS } from '@/lib/portfolio-data'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -45,11 +45,19 @@ const DEFAULT_BENTO_ITEMS: BentoItem[] = [
     title: SOCIAL_LINKS.email.label || "Let's talk",
     subtitle: 'Contact me',
     description: 'Get in touch for opportunities',
-    icon: <FaSlack />,
+    icon: <FaEnvelope />,
     href: SOCIAL_LINKS.email.url,
   },
   {
     id: 2,
+    title: SOCIAL_LINKS.linkedin.label || "LinkedIn",
+    subtitle: SOCIAL_LINKS.linkedin.handle,
+    description: 'Professional network & collaborations',
+    icon: <FaLinkedin />,
+    href: SOCIAL_LINKS.linkedin.url,
+  },
+  {
+    id: 3,
     title: SOCIAL_LINKS.twitter.label || "Socials",
     subtitle: SOCIAL_LINKS.twitter.handle,
     description: 'Stay updated with my work',
@@ -57,7 +65,7 @@ const DEFAULT_BENTO_ITEMS: BentoItem[] = [
     href: SOCIAL_LINKS.twitter.url,
   },
   {
-    id: 3,
+    id: 4,
     title: SOCIAL_LINKS.github.label || "GitHub",
     subtitle: 'Open Source',
     description: 'Check out my code',
@@ -215,7 +223,7 @@ export function StaggeredGrid({
         '--grid-item-translate': '0px',
       } as React.CSSProperties}
     >
-      <section className="grid place-items-center w-full relative mt-[10vh]">
+      <section className="grid place-items-center w-full relative mt-[6vh]">
         <div ref={textRef} className="text font-alt uppercase flex content-center text-[clamp(3rem,14vw,10rem)] leading-[0.7] text-neutral-900 dark:text-white">
           {splitText(centerText)}
         </div>
@@ -242,7 +250,7 @@ export function StaggeredGrid({
                             ? "bg-zinc-900/10 shadow-2xl"
                             : "bg-zinc-950"
                         )}
-                        style={{ width: isActive ? "60%" : "20%" }}
+                        style={{ width: isActive ? (bentoItems.length === 4 ? "52%" : "60%") : (bentoItems.length === 4 ? "16%" : "20%") }}
                         onMouseEnter={() => setActiveBento(index)}
                         onClick={() => {
                           if (isActive && bentoItem.href) {
@@ -322,8 +330,8 @@ export function StaggeredGrid({
             if (i === 17 || i === 18) return null;
 
             if (typeof item === 'string') {
-              const Icon = i % 3 === 0 ? FaGithub : i % 3 === 1 ? FaSlack : FaTwitter;
-              const label = i % 3 === 0 ? "Github" : i % 3 === 1 ? "Slack" : "Twitter";
+              const Icon = i % 4 === 0 ? FaGithub : i % 4 === 1 ? FaLinkedin : i % 4 === 2 ? FaTwitter : FaEnvelope;
+              const label = i % 4 === 0 ? "Github" : i % 4 === 1 ? "LinkedIn" : i % 4 === 2 ? "Twitter" : "Email";
 
               return (
                 <figure key={`img-${i}`} data-col={i % 7} className="grid__item m-0 relative z-10 [perspective:800px] will-change-[transform,opacity] group cursor-pointer">
@@ -353,7 +361,7 @@ export function StaggeredGrid({
       </section >
 
       {showFooter && (
-        <footer className="w-full pt-4 pb-6 px-8 flex flex-col sm:flex-row justify-between items-center gap-4 relative z-50 text-neutral-400 text-xs tracking-wider border-t border-white/5">
+        <footer className="w-full pt-4 pb-3 sm:pb-4 px-8 flex flex-col sm:flex-row justify-between items-center gap-4 relative z-50 text-neutral-400 text-xs tracking-wider border-t border-white/5">
           <span>&copy; {new Date().getFullYear()} Harman Saini. All Rights Reserved.</span>
           <div className="flex items-center gap-5">
             <a href={SOCIAL_LINKS.github.url} target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">GitHub</a>

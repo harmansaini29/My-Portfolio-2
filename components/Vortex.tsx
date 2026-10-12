@@ -150,6 +150,7 @@ export interface VortexConfig {
     repelRadius: number;
     repelStrength: number;
     running: boolean;
+    dissolveProgress?: number | any;
 }
 
 export type VortexAPI = {
@@ -346,6 +347,128 @@ function makeShape(cfg: VortexConfig) {
     };
 }
 
+/* ============================================================ dissolve shaders */
+
+const coverVertexShader = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const coverFragmentShader = /* glsl */ `
+  uniform sampler2D uTexture;
+  uniform vec2 uResolution;
+  uniform float uDissolve;
+  uniform vec2 uCenter;
+  uniform float uTime;
+  uniform float uGrayscale;
+  uniform float uEdgeIntensity;
+  uniform float uEdgeBrightness;
+  varying vec2 vUv;
+
+  mat3 sobelX = mat3(
+    -1.0, 0.0, 1.0,
+    -2.0, 0.0, 2.0,
+    -1.0, 0.0, 1.0
+  );
+
+  mat3 sobelY = mat3(
+    -1.0, -2.0, -1.0,
+     0.0,  0.0,  0.0,
+     1.0,  2.0,  1.0
+  );
+
+  float getLuminance(vec3 color) {
+    return dot(color, vec3(0.299, 0.587, 0.114));
+  }
+
+  float sobel(sampler2D tex, vec2 uv, vec2 texelSize) {
+    float gx = 0.0;
+    float gy = 0.0;
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        vec2 offset = vec2(float(i), float(j)) * texelSize;
+        float lum = getLuminance(texture2D(tex, uv + offset).rgb);
+        gx += lum * sobelX[i + 1][j + 1];
+        gy += lum * sobelY[i + 1][j + 1];
+      }
+    }
+    return sqrt(gx * gx + gy * gy);
+  }
+
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  }
+
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+  }
+
+  float fbm(vec2 p) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    float frequency = 1.0;
+    for (int i = 0; i < 5; i++) {
+      value += amplitude * noise(p * frequency);
+      amplitude *= 0.5;
+      frequency *= 2.0;
+    }
+    return value;
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    vec4 texColor = texture2D(uTexture, uv);
+    float gray = getLuminance(texColor.rgb);
+    texColor.rgb = mix(texColor.rgb, vec3(gray), uGrayscale);
+
+    vec2 centeredUv = vUv - uCenter;
+    float aspect = uResolution.x / max(uResolution.y, 1.0);
+    centeredUv.x *= aspect;
+    float dist = length(centeredUv);
+    float angle = atan(centeredUv.y, centeredUv.x);
+
+    float noiseScale = 6.0;
+    vec2 pixelatedUv = floor(vUv * uResolution / noiseScale) * noiseScale / uResolution;
+    float blockNoise = fbm(pixelatedUv * 100.0) * 0.15;
+    float angularNoise = fbm(vec2(angle * 5.0, 0.0)) * 0.15;
+    float totalNoise = blockNoise + angularNoise;
+    float noisyDist = dist + totalNoise;
+
+    float maxDist = length(vec2(aspect * 0.5, 0.5));
+    float normalizedDist = noisyDist / maxDist;
+    float dissolveThreshold = uDissolve * 1.5;
+
+    vec2 texelSize = 1.0 / uResolution;
+    float edge = clamp(pow(sobel(uTexture, uv, texelSize), 0.7) * 2.0, 0.0, 1.0);
+    float dissolveMask = smoothstep(dissolveThreshold - 0.03, dissolveThreshold, normalizedDist);
+
+    vec3 edgeColor = vec3(1.0, 1.0, 1.0);
+    vec3 baseColor = mix(texColor.rgb, vec3(0.0), uGrayscale);
+    vec3 finalColor = baseColor;
+
+    float edgeGlow = edge * (uEdgeIntensity * 2.0) * (1.0 + uGrayscale * 3.0);
+    finalColor += edgeColor * edgeGlow * uEdgeBrightness;
+
+    float edgeZoneWidth = 0.15 * (1.0 - uDissolve) + 0.02;
+    float edgeZone = smoothstep(dissolveThreshold - edgeZoneWidth, dissolveThreshold - edgeZoneWidth + 0.04, normalizedDist) *
+                     smoothstep(dissolveThreshold + 0.02, dissolveThreshold - 0.02, normalizedDist);
+    float sparkle = hash(floor(vUv * uResolution / 4.0)) * edgeZone;
+    finalColor += vec3(sparkle * 3.0 * (1.0 - uDissolve) * uEdgeBrightness * (1.0 + uGrayscale * 2.0));
+
+    gl_FragColor = vec4(finalColor, dissolveMask * texColor.a);
+  }
+`;
+
 /* ============================================================ engine */
 
 function createVortex(
@@ -443,6 +566,31 @@ function createVortex(
         disposables.push(x);
         return x;
     };
+
+    let renderTarget: THREE.WebGLRenderTarget | null = null;
+    const postScene = new THREE.Scene();
+    const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const dissolveUniforms = {
+        uTexture: { value: null as THREE.Texture | null },
+        uResolution: { value: new THREE.Vector2(1, 1) },
+        uDissolve: { value: 0 },
+        uCenter: { value: new THREE.Vector2(0.5, 0.5) },
+        uTime: { value: 0 },
+        uGrayscale: { value: 0 },
+        uEdgeIntensity: { value: 0 },
+        uEdgeBrightness: { value: 1.0 },
+    };
+
+    const postMat = track(new THREE.ShaderMaterial({
+        vertexShader: coverVertexShader,
+        fragmentShader: coverFragmentShader,
+        uniforms: dissolveUniforms,
+        transparent: true,
+    }));
+
+    const postQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMat);
+    postScene.add(postQuad);
 
     let strands: Strand[] = [];
     let strandPos = new Float32Array(0);
@@ -1045,7 +1193,9 @@ function createVortex(
         }
     }
 
+    let isVortexVisible = true;
     function step(now: number) {
+        if (!isVortexVisible) return;
         frame = requestAnimationFrame(step);
         const cfg = cfgRef.current;
         const dt = Math.min((now - lastTime) / 1000, 0.04);
@@ -1148,11 +1298,61 @@ function createVortex(
         tick++;
         if (tick % 2 === 0 && dotCount > 0) collide(t);
 
-        renderer.render(scene, camera);
+        const rawDissolve = cfg.dissolveProgress;
+        const dProgress = typeof rawDissolve === "object" && rawDissolve !== null && typeof rawDissolve.get === "function"
+            ? rawDissolve.get()
+            : Number(rawDissolve || 0);
+
+        if (dProgress <= 0.001) {
+            renderer.setRenderTarget(null);
+            renderer.render(scene, camera);
+        } else {
+            const w = container.clientWidth || 1;
+            const h = container.clientHeight || 1;
+            const dpr = renderer.getPixelRatio();
+            const tw = Math.floor(w * dpr);
+            const th = Math.floor(h * dpr);
+
+            if (!renderTarget || renderTarget.width !== tw || renderTarget.height !== th) {
+                renderTarget?.dispose();
+                renderTarget = new THREE.WebGLRenderTarget(tw, th, {
+                    minFilter: THREE.LinearFilter,
+                    magFilter: THREE.LinearFilter,
+                    format: THREE.RGBAFormat,
+                });
+            }
+
+            renderer.setRenderTarget(renderTarget);
+            renderer.clear();
+            renderer.render(scene, camera);
+
+            renderer.setRenderTarget(null);
+            dissolveUniforms.uTexture.value = renderTarget.texture;
+            dissolveUniforms.uResolution.value.set(tw, th);
+            dissolveUniforms.uDissolve.value = Math.min(1.0, Math.max(0.0, dProgress));
+            dissolveUniforms.uTime.value = t;
+            dissolveUniforms.uGrayscale.value = Math.min(1.0, dProgress / 0.45);
+            dissolveUniforms.uEdgeIntensity.value = dProgress * 0.8;
+            dissolveUniforms.uEdgeBrightness.value = 1.0 - dProgress * 0.4;
+
+            renderer.render(postScene, postCamera);
+        }
     }
 
     build();
     observer.observe(container);
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+        const visible = entry?.isIntersecting ?? true;
+        if (!isVortexVisible && visible) {
+            isVortexVisible = true;
+            lastTime = performance.now();
+            frame = requestAnimationFrame(step);
+        } else if (!visible) {
+            isVortexVisible = false;
+            cancelAnimationFrame(frame);
+        }
+    }, { threshold: 0.02 });
+    visibilityObserver.observe(container);
     lastTime = performance.now();
     frame = requestAnimationFrame(step);
 
@@ -1163,9 +1363,17 @@ function createVortex(
         dispose() {
             cancelAnimationFrame(frame);
             observer.disconnect();
+            visibilityObserver.disconnect();
             container.removeEventListener("pointermove", onPointerMove);
             container.removeEventListener("pointerleave", onPointerLeave);
             container.removeEventListener("pointercancel", onPointerLeave);
+
+            if (renderTarget) {
+                renderTarget.dispose();
+                renderTarget = null;
+            }
+            postQuad.geometry.dispose();
+            postMat.dispose();
             
             for (const d of disposables) {
                 try {
@@ -1234,6 +1442,7 @@ export interface VortexProps {
     intensity?: number;
     glow?: number;
     speedMultiplier?: number;
+    dissolveProgress?: number | any;
 }
 
 function OriginkitBaseVortex(props: VortexProps) {
@@ -1259,6 +1468,7 @@ function OriginkitBaseVortex(props: VortexProps) {
         intensity = 1.0,
         glow = 1.0,
         speedMultiplier = 1.0,
+        dissolveProgress,
     } = props;
 
     const containerRef = React.useRef<HTMLDivElement>(null);
@@ -1301,6 +1511,7 @@ function OriginkitBaseVortex(props: VortexProps) {
         repelRadius: shove.radius,
         repelStrength: shove.strength,
         running,
+        dissolveProgress,
     };
 
     const buildKey = JSON.stringify([

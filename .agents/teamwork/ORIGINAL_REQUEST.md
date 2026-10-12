@@ -123,3 +123,55 @@ Update the existing `lib/portfolio-data.ts` to act as the centralized configurat
 
 ---
 *Next: when approved → delegate via invoke_subagent (see Delegation Protocol)*
+
+## 2026-10-11T21:02:37Z
+
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Craft prompt → get user approval → delegate to teamwork_preview
+> Requested team: Full agent team
+
+Use the full team of agents.
+
+Final comprehensive optimization, mobile/tablet responsiveness with auto-hover hints, direct Vortex dissolve unification, rectangular project showcase with single-line orbital light border, and footer cleanup with LinkedIn integration.
+
+Working directory: e:\Cloned Github Repo\My-Portfolio 2
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Global Performance & Smooth Scroll Calibration
+Adjust Lenis scroll physics in `components/SmoothScroll.tsx` (duration: 1.2, wheelMultiplier: 1.0, touchMultiplier: 1.2) to deliver a silky, controlled, luxurious momentum that is neither too fast nor laggy. Optimize WebGL canvas frameloops and event listeners across all sections to ensure fluid, jitter-free 60-120fps rendering.
+
+### R2. Mobile/Tablet Responsiveness & Auto-Hover Hints
+Ensure every section and component is fully responsive across mobile phones, tablets, and desktops (360px to 4K). In touch/mobile environments where cursor hover does not exist (specifically `HoverImageReveal` in the Achievements section), implement an autonomous gentle cyclic hover hint/preview loop when idle so mobile users see previews automatically without requiring manual touch locking.
+
+### R3. Direct Vortex Dissolve Unification & Info Border Removal
+Refactor `components/VortexAbout.tsx` and `components/VortexAbout.css` so that the GLSL Sobel/FBM noise dissolve transition acts directly on the primary live Vortex instance without creating or displaying a duplicate/procedural vortex canvas. Remove the harsh background borders on the left and right informational text blocks (`.sj-text-flow`) so the text floats cleanly over the space.
+
+### R4. Rectangular Projects Container & Curvy Monoline Running Light Border
+Refactor `components/ChromiumBorderContainer.tsx` and `components/ProjectsSection.tsx` from a rigid square to a responsive rectangular aspect ratio (e.g., `aspect-[16/10]` or `w-[94vw] max-w-5xl h-[65vh] md:h-[74vh]`) so inner project cards and text are never cut off. Replace the double borders and mechanical corner brackets with a sleek, single-line curvy rounded border featuring a continuous cyan and amber photonic running light beam orbiting smoothly along the perimeter.
+
+### R5. Footer Whitespace Elimination & LinkedIn Integration
+Compress remaining trailing whitespace in `components/ContactSection.tsx` to leave only minimal clean breathing room. In the interactive Bento contact group, explicitly integrate the LinkedIn profile (`SOCIAL_LINKS.linkedin`) as an active primary card alongside GitHub, Twitter, and Email.
+
+### R6. Centralized Social Configuration Maintenance
+Preserve the centralized, typed `SOCIAL_LINKS` registry in `lib/portfolio-data.ts`, ensuring all social buttons and links across the site cleanly consume this single source of truth.
+
+## Acceptance Criteria
+
+### Visual & Interactive Verification
+- [ ] Page scrolling exhibits a smooth, controlled momentum without aggressive acceleration or lag.
+- [ ] All components resize cleanly down to 360px mobile viewports with zero horizontal overflow.
+- [ ] Achievements section runs an automatic cyclic preview hint on touch devices when idle.
+- [ ] Vortex dissolve transitions smoothly on the primary canvas with no duplicate texture flicker, and info blocks have no outer border lines.
+- [ ] Projects container is rectangular with plenty of vertical breathing room, enclosed by a curvy rounded single-line border with an orbiting cyan/amber running light beam.
+- [ ] LinkedIn profile is actively present in the Bento cards, and the portfolio ends cleanly with minimal bottom padding.
+
+### Code Quality Verification
+- [ ] Zero TypeScript or React lint warnings (`npx tsc --noEmit`).
+- [ ] Production build succeeds cleanly (`npm run build`).
+
+---
+*Next: when approved → delegate via invoke_subagent (see Delegation Protocol)*

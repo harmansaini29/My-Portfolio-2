@@ -1,296 +1,14 @@
 // components/VortexAbout.tsx
 "use client";
 
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrthographicCamera } from "@react-three/drei";
-import * as THREE from "three";
 
 import GooeyTextReveal from "@/components/ui/GooeyTextReveal";
 import "./VortexAbout.css";
 
 const Vortex = dynamic(() => import("./Vortex"), { ssr: false });
-
-// Exact GLSL Sobel Edge Detection & FBM Noise Dissolve Shaders
-const coverVertexShader = /* glsl */ `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const coverFragmentShader = /* glsl */ `
-  uniform sampler2D uTexture;
-  uniform vec2 uResolution;
-  uniform float uDissolve;
-  uniform vec2 uCenter;
-  uniform float uTime;
-  uniform float uGrayscale;
-  uniform float uEdgeIntensity;
-  uniform float uEdgeBrightness;
-  varying vec2 vUv;
-
-  mat3 sobelX = mat3(
-    -1.0, 0.0, 1.0,
-    -2.0, 0.0, 2.0,
-    -1.0, 0.0, 1.0
-  );
-
-  mat3 sobelY = mat3(
-    -1.0, -2.0, -1.0,
-     0.0,  0.0,  0.0,
-     1.0,  2.0,  1.0
-  );
-
-  float getLuminance(vec3 color) {
-    return dot(color, vec3(0.299, 0.587, 0.114));
-  }
-
-  float sobel(sampler2D tex, vec2 uv, vec2 texelSize) {
-    float gx = 0.0;
-    float gy = 0.0;
-    for (int i = -1; i <= 1; i++) {
-      for (int j = -1; j <= 1; j++) {
-        vec2 offset = vec2(float(i), float(j)) * texelSize;
-        float lum = getLuminance(texture2D(tex, uv + offset).rgb);
-        gx += lum * sobelX[i + 1][j + 1];
-        gy += lum * sobelY[i + 1][j + 1];
-      }
-    }
-    return sqrt(gx * gx + gy * gy);
-  }
-
-  float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-  }
-
-  float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-  }
-
-  float fbm(vec2 p) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-    
-    for (int i = 0; i < 5; i++) {
-      value += amplitude * noise(p * frequency);
-      amplitude *= 0.5;
-      frequency *= 2.0;
-    }
-    
-    return value;
-  }
-
-  void main() {
-    vec2 uv = vUv;
-    vec4 texColor = texture2D(uTexture, uv);
-    
-    float gray = getLuminance(texColor.rgb);
-    vec3 grayscaleColor = vec3(gray);
-    texColor.rgb = mix(texColor.rgb, grayscaleColor, uGrayscale);
-    
-    vec2 centeredUv = vUv - uCenter;
-    float aspect = uResolution.x / max(uResolution.y, 1.0);
-    centeredUv.x *= aspect;
-    float dist = length(centeredUv);
-    
-    float angle = atan(centeredUv.y, centeredUv.x);
-    
-    float noiseScale = 6.0;
-    vec2 pixelatedUv = floor(vUv * uResolution / noiseScale) * noiseScale / uResolution;
-    float blockNoise = fbm(pixelatedUv * 100.0) * 0.15;
-    float angularNoise = fbm(vec2(angle * 5.0, 0.0)) * 0.15;
-    
-    float totalNoise = blockNoise + angularNoise;
-    float noisyDist = dist + totalNoise;
-    
-    float maxDist = length(vec2(aspect * 0.5, 0.5));
-    float normalizedDist = noisyDist / maxDist;
-    
-    float dissolveThreshold = uDissolve * 1.5; 
-    
-    vec2 texelSize = 1.0 / uResolution;
-    float edge = sobel(uTexture, uv, texelSize);
-    
-    edge = pow(edge, 0.7) * 2.0;
-    edge = clamp(edge, 0.0, 1.0);
-    
-    float dissolveMask = smoothstep(dissolveThreshold - 0.03, dissolveThreshold, normalizedDist);
-    
-    vec3 edgeColor = vec3(1.0, 1.0, 1.0);
-    vec3 baseColor = mix(texColor.rgb, vec3(0.0), uGrayscale);
-    vec3 finalColor = baseColor;
-    
-    float edgeGlowIntensity = uEdgeIntensity * 2.0;
-    float edgeGlow = edge * edgeGlowIntensity * (1.0 + uGrayscale * 3.0);
-    finalColor += edgeColor * edgeGlow * uEdgeBrightness;
-    
-    float edgeZoneWidth = 0.15 * (1.0 - uDissolve) + 0.02;
-    float edgeZone = smoothstep(dissolveThreshold - edgeZoneWidth, dissolveThreshold - edgeZoneWidth + 0.04, normalizedDist) * 
-                     smoothstep(dissolveThreshold + 0.02, dissolveThreshold - 0.02, normalizedDist);
-    float sparkle = hash(floor(vUv * uResolution / 4.0)) * edgeZone;
-    
-    float edgeBrightness = (1.0 - uDissolve) * uEdgeBrightness * (1.0 + uGrayscale * 2.0);
-    finalColor += vec3(sparkle * 3.0 * edgeBrightness);
-    
-    float alpha = dissolveMask * texColor.a;
-    gl_FragColor = vec4(finalColor, alpha);
-  }
-`;
-
-/**
- * Procedural Dynamic 3D WebGL Vortex Canvas Texture (Fallback)
- */
-function createProceduralVortexTexture(): { texture: THREE.CanvasTexture; update: (t: number) => void } {
-  const size = 1024;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d")!;
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-
-  const update = (time: number) => {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, size, size);
-
-    const cx = size / 2;
-    const cy = size / 2;
-
-    const strandCount = 120;
-    for (let i = 0; i < strandCount; i++) {
-      const angleOffset = (i / strandCount) * Math.PI * 2 + time * 0.35;
-      ctx.beginPath();
-      for (let r = 20; r < size * 0.65; r += 8) {
-        const spiralAngle = angleOffset + (r / size) * 8.5;
-        const x = cx + Math.cos(spiralAngle) * r;
-        const y = cy + Math.sin(spiralAngle) * r;
-        if (r === 20) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-      ctx.strokeStyle = i % 4 === 0 ? "rgba(6, 182, 212, 0.7)" : i % 4 === 1 ? "rgba(249, 115, 26, 0.85)" : "rgba(255, 255, 255, 0.6)";
-      ctx.lineWidth = i % 3 === 0 ? 2.5 : 1.2;
-      ctx.stroke();
-    }
-
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 0.22);
-    grad.addColorStop(0, "rgba(255, 255, 255, 0.95)");
-    grad.addColorStop(0.3, "rgba(6, 182, 212, 0.6)");
-    grad.addColorStop(0.7, "rgba(249, 115, 26, 0.3)");
-    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, size * 0.22, 0, Math.PI * 2);
-    ctx.fill();
-
-    texture.needsUpdate = true;
-  };
-
-  update(0);
-  return { texture, update };
-}
-
-interface DissolveSceneProps {
-  dissolveProgress: ReturnType<typeof useTransform<number, number>>;
-}
-
-const DissolveScene = ({ dissolveProgress }: DissolveSceneProps) => {
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
-  const { size } = useThree();
-  const invalidate = useThree((state) => state.invalidate);
-  const liveTexRef = useRef<THREE.CanvasTexture | null>(null);
-
-  const { texture: fallbackTexture, update } = useMemo(() => {
-    return createProceduralVortexTexture();
-  }, []);
-
-  useEffect(() => {
-    return dissolveProgress.on("change", () => invalidate());
-  }, [invalidate, dissolveProgress]);
-
-  const uniforms = useMemo(
-    () => ({
-      uTexture: { value: fallbackTexture },
-      uResolution: { value: new THREE.Vector2(size.width, size.height) },
-      uDissolve: { value: 0 },
-      uCenter: { value: new THREE.Vector2(0.5, 0.5) },
-      uTime: { value: 0 },
-      uGrayscale: { value: 0 },
-      uEdgeIntensity: { value: 0 },
-      uEdgeBrightness: { value: 1.0 },
-    }),
-    [fallbackTexture, size.width, size.height]
-  );
-
-  useFrame((state) => {
-    const progress = THREE.MathUtils.clamp(dissolveProgress.get(), 0, 1);
-    if (progress <= 0.001 || progress >= 1.0) {
-      return;
-    }
-
-    const time = state.clock.getElapsedTime();
-
-    // Directly bind to the live vortex canvas rendered in the DOM
-    if (!liveTexRef.current && typeof document !== "undefined") {
-      const vCanvas = document.querySelector(".vortex-webgl-canvas") as HTMLCanvasElement;
-      if (vCanvas && vCanvas.width > 0) {
-        const tex = new THREE.CanvasTexture(vCanvas);
-        tex.minFilter = THREE.LinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-        liveTexRef.current = tex;
-      }
-    }
-
-    if (liveTexRef.current) {
-      liveTexRef.current.needsUpdate = true;
-      if (materialRef.current && materialRef.current.uniforms.uTexture.value !== liveTexRef.current) {
-        materialRef.current.uniforms.uTexture.value = liveTexRef.current;
-      }
-    } else {
-      update(time);
-    }
-
-    if (materialRef.current) {
-      materialRef.current.uniforms.uTime.value = time;
-      materialRef.current.uniforms.uResolution.value.set(size.width, size.height);
-      materialRef.current.uniforms.uDissolve.value = progress;
-      const grayscaleProgress = Math.min(1.0, progress / 0.45);
-      materialRef.current.uniforms.uGrayscale.value = grayscaleProgress;
-      materialRef.current.uniforms.uEdgeIntensity.value = progress * 0.8;
-      materialRef.current.uniforms.uEdgeBrightness.value = 1.0 - progress * 0.4;
-    }
-  });
-
-  return (
-    <mesh position={[0, 0, 0]}>
-      <planeGeometry args={[2, 2]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={coverVertexShader}
-        fragmentShader={coverFragmentShader}
-        uniforms={uniforms}
-        transparent={true}
-      />
-    </mesh>
-  );
-};
 
 export default function VortexAbout() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -298,7 +16,6 @@ export default function VortexAbout() {
 
   const [leftActive, setLeftActive] = useState(false);
   const [rightActive, setRightActive] = useState(false);
-  const [isDissolving, setIsDissolving] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 960);
@@ -330,13 +47,11 @@ export default function VortexAbout() {
   // ---------------------------------------------------------------------------------------------------
   // REVISED TIMING: LEFT CARD ONLY REVEALS ONCE FULLY IMMERSED (v >= 0.38)
   // RIGHT CARD FOLLOWS SMOOTHLY AT (v >= 0.52)
-  // DISSOLVE GATED ACTIVE WINDOW (0.74 <= v <= 1.02)
   // ---------------------------------------------------------------------------------------------------
   useEffect(() => {
     return smoothProgress.on("change", (v) => {
       setLeftActive(v >= 0.38);
       setRightActive(v >= 0.52);
-      setIsDissolving(v >= 0.74 && v <= 1.02);
     });
   }, [smoothProgress]);
 
@@ -352,7 +67,7 @@ export default function VortexAbout() {
 
   const vortexOpacity = useTransform(
     smoothProgress,
-    [0.0, 0.15, 0.74, 0.741],
+    [0.0, 0.15, 0.98, 1.0],
     [0.6, 1.0, 1.0, 0.0]
   );
 
@@ -419,6 +134,7 @@ export default function VortexAbout() {
             comets
             direction="right"
             className="w-full h-full"
+            dissolveProgress={dissolveNormalized}
           />
         </motion.div>
 
@@ -593,28 +309,12 @@ export default function VortexAbout() {
         </div>
 
         {/* =====================================================================
-             LAYER 4: NATIVE SOBEL EDGE & FBM NOISE DISSOLVE PIPELINE
-             Seamlessly dissolves the live vortex track without container jump
+             LAYER 4: DIRECT GLSL DISSOLVE HUD & TRANSITION
              ===================================================================== */}
         <motion.div
           className="sj-dissolve-layer"
-          style={{ opacity: dissolveLayerOpacity }}
-        >
-          <Canvas dpr={1} frameloop={isDissolving ? "always" : "never"} gl={{ antialias: false, alpha: true }}>
-            <OrthographicCamera
-              makeDefault
-              manual
-              left={-1}
-              right={1}
-              top={1}
-              bottom={-1}
-              near={0.1}
-              far={10}
-              position={[0, 0, 1]}
-            />
-            <DissolveScene dissolveProgress={dissolveNormalized} />
-          </Canvas>
-        </motion.div>
+          style={{ opacity: 0, pointerEvents: "none" }}
+        />
 
         {/* Telemetry HUD displaying transition status */}
         <motion.div

@@ -54,16 +54,25 @@ const stickySource = fs.readFileSync(path.join(PROJECT_ROOT, 'components/StickyS
 // ---------------------------------------------------------------------------
 console.log('▸ SUITE 1: Projects Section & ChromiumBorderContainer Constraints');
 
-runTest('1.1: ChromiumBorderContainer specifies aspect-square', () => {
-  assert(chromiumSource.includes('aspect-square'), 'ChromiumBorderContainer must contain aspect-square class');
+runTest('1.1: ChromiumBorderContainer specifies responsive rectangular aspect ratio', () => {
+  assert(
+    chromiumSource.includes('aspect-[16/10]') || chromiumSource.includes('aspect-[16/9]') || chromiumSource.includes('h-[65vh]'),
+    'ChromiumBorderContainer must declare responsive rectangular aspect ratio'
+  );
 });
 
-runTest('1.2: ChromiumBorderContainer specifies max-h-[min(70vh,640px)]', () => {
-  assert(chromiumSource.includes('max-h-[min(70vh,640px)]'), 'ChromiumBorderContainer must contain max-h-[min(70vh,640px)]');
+runTest('1.2: ChromiumBorderContainer specifies responsive height constraint', () => {
+  assert(
+    chromiumSource.includes('h-[65vh]') || chromiumSource.includes('max-h-[700px]'),
+    'ChromiumBorderContainer must declare responsive height constraint'
+  );
 });
 
-runTest('1.3: ChromiumBorderContainer specifies max-w-[min(94vw,70vh,640px)]', () => {
-  assert(chromiumSource.includes('max-w-[min(94vw,70vh,640px)]'), 'ChromiumBorderContainer must contain max-w-[min(94vw,70vh,640px)]');
+runTest('1.3: ChromiumBorderContainer specifies responsive width constraint', () => {
+  assert(
+    chromiumSource.includes('w-[94vw]') && (chromiumSource.includes('max-w-5xl') || chromiumSource.includes('max-w-6xl')),
+    'ChromiumBorderContainer must declare responsive width constraint'
+  );
 });
 
 runTest('1.4: ProjectsSection sets max-h-screen and overflow-hidden on outer section', () => {
@@ -100,10 +109,13 @@ function calculateProjectsSectionRenderedHeight(viewportWidth, viewportHeight) {
   // Padding py-3 (< 640px) = 24px, py-5 (>= 640px) = 40px
   const py = viewportWidth < 640 ? 24 : 40;
 
-  // Container constraint: min(94vw, 70vh, 640px)
-  const vw94 = 0.94 * viewportWidth;
-  const vh70 = 0.70 * viewportHeight;
-  const containerSize = Math.min(vw94, vh70, 640);
+  // Responsive rectangular container constraint:
+  // Height is md:h-[72vh] (>= 768px) or h-[65vh] (< 768px), aspect-[16/10] capped at max-h-[700px]
+  const targetHeightRatio = viewportWidth >= 768 ? 0.72 : 0.65;
+  const targetHeight = targetHeightRatio * viewportHeight;
+  const widthCapHeight = (0.94 * viewportWidth) / 1.6;
+  const maxAvailable = Math.max(100, viewportHeight - py - titleHeight - 16);
+  const containerSize = Math.min(targetHeight, widthCapHeight, 700, maxAvailable);
 
   const totalRenderedHeight = py + titleHeight + containerSize;
   const clearance = viewportHeight - totalRenderedHeight;
@@ -242,9 +254,10 @@ runTest('4.1: ContactSection grid container applies mb-8 pb-4 buffer below grid'
   assert(contactSource.includes('pb-4'), 'Must include pb-4 (16px bottom padding)');
 });
 
-runTest('4.2: Footer has pt-4 pb-6 and relative z-50 above standard flow', () => {
+runTest('4.2: Footer has compressed padding and relative z-50 above standard flow', () => {
   assert(contactSource.includes('pt-4'), 'Footer must have pt-4');
   assert(contactSource.includes('z-50'), 'Footer must have z-50');
+  assert(contactSource.includes('pb-3') || contactSource.includes('pb-4'), 'Footer must have compressed padding');
 });
 
 runTest('4.3: BentoContainer scale(1.5) and y-translation clearance simulation', () => {

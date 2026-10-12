@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -12,15 +13,15 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       gsap.registerPlugin(ScrollTrigger);
     }
 
-    // Configure Lenis for ultra-responsive, silky smooth scrolling
+    // Configure Lenis for calibrated luxurious smooth scrolling
     const lenis = new Lenis({
-      duration: 0.9, // Fast & crisp response — no dragging or heavy lag
+      duration: 1.2, // Silky, controlled, luxurious momentum
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 1.25, // Snappy response so single flick moves cleanly
-      touchMultiplier: 1.6,  // Fast on mobile
+      wheelMultiplier: 1.0, // Natural 1:1 wheel response
+      touchMultiplier: 1.2, // Controlled mobile flick momentum
       infinite: false,
     });
 

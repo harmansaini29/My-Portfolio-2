@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type CSSProperties } from "react";
+import { useRef, useState, useEffect, type CSSProperties } from "react";
 import {
   motion,
   useMotionValue,
@@ -104,9 +104,9 @@ const DEFAULT_ITEMS: ItemsValue = {
 const DEFAULT_FONT: FontValue = {
   fontFamily: "Inter",
   fontWeight: 400,
-  fontSize: 61,
-  lineHeight: "0.9em",
-  letterSpacing: "-0.05em",
+  fontSize: "clamp(1.25rem, 4vw, 3.8rem)",
+  lineHeight: "1.1em",
+  letterSpacing: "-0.03em",
   textAlign: "left",
 };
 
@@ -147,6 +147,8 @@ function __OriginkitBase_HoverImageReveal({
 }: HoverImageRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState<number | null>(null);
+  const [isTouch, setIsTouch] = useState(false);
+  const userInteractedRef = useRef(false);
 
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
@@ -171,6 +173,56 @@ function __OriginkitBase_HoverImageReveal({
     });
   }
   const anyActive = hovered != null;
+
+  useEffect(() => {
+    const checkTouch = () => {
+      setIsTouch(
+        typeof window !== "undefined" &&
+          (window.matchMedia("(hover: none) and (pointer: coarse)").matches ||
+            window.innerWidth < 768)
+      );
+    };
+    checkTouch();
+    window.addEventListener("resize", checkTouch);
+    return () => window.removeEventListener("resize", checkTouch);
+  }, []);
+
+  // Autonomous gentle cyclic hover preview hint loop for touch / mobile when idle
+  useEffect(() => {
+    if (!isTouch || count <= 1) return;
+
+    const cycleInterval = setInterval(() => {
+      if (userInteractedRef.current) return;
+      setHovered((prev) => {
+        const next = prev === null ? 0 : (prev + 1) % count;
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) {
+          rawX.set(rect.width * 0.5);
+          rawY.set(rect.height * 0.5);
+        }
+        return next;
+      });
+    }, 3000);
+
+    return () => {
+      clearInterval(cycleInterval);
+    };
+  }, [isTouch, count]);
+
+  const onTouchInteract = (idx?: number) => {
+    userInteractedRef.current = true;
+    if (typeof idx === "number") {
+      setHovered(idx);
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        rawX.set(rect.width * 0.5);
+        rawY.set(rect.height * 0.5);
+      }
+    }
+    setTimeout(() => {
+      userInteractedRef.current = false;
+    }, 4500);
+  };
 
   const onMove = (e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -211,8 +263,8 @@ function __OriginkitBase_HoverImageReveal({
           y,
           translateX: "-50%",
           translateY: "-50%",
-          width: imageWidth,
-          height: imageHeight,
+          width: isTouch ? "min(80vw, 280px)" : imageWidth,
+          height: isTouch ? "min(40vh, 360px)" : imageHeight,
           borderRadius: rounded,
           overflow: "hidden",
           pointerEvents: "none",
@@ -286,7 +338,9 @@ function __OriginkitBase_HoverImageReveal({
             display: "block",
             color,
             transition: "color 0.2s ease",
-            whiteSpace: "pre",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            maxWidth: "92vw",
             textAlign: alignToText[align],
           };
           const inner = (
@@ -314,9 +368,12 @@ function __OriginkitBase_HoverImageReveal({
             <div
               key={i}
               onMouseEnter={() => setHovered(i)}
+              onTouchStart={() => onTouchInteract(i)}
+              onClick={() => onTouchInteract(i)}
               style={{
                 overflow: "hidden",
                 cursor: item.link ? "pointer" : "default",
+                maxWidth: "100%",
               }}
             >
               {item.link ? (
