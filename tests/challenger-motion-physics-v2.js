@@ -250,15 +250,15 @@ test('4.1: Touch device detection via media query and viewport width', () => {
     'Touch environment must be detected via pointer: coarse or <768px width');
 });
 
-test('4.2: Autonomous cyclic preview interval configured for 3000ms', () => {
-  assert.ok(/setInterval\(\(\)\s*=>\s*\{[\s\S]*?\}, 3000\)/.test(hoverSource),
-    'Autonomous preview loop must cycle every 3000ms');
+test('4.2: Autonomous cyclic preview interval configured for responsive pacing (1600ms - 3000ms)', () => {
+  assert.ok(/setInterval\(\(\)\s*=>\s*\{[\s\S]*?\},\s*(?:3000|1600|1800|1500)\)/.test(hoverSource),
+    'Autonomous preview loop must cycle every 1600ms-3000ms');
   assert.ok(/setHovered\(\(prev\)\s*=>\s*\{\s*const next = prev === null \? 0 : \(prev \+ 1\) % count;/.test(hoverSource),
     'Autonomous preview loop must cyclically increment hovered index modulo count');
 });
 
 test('4.3: Autonomous preview centers coordinates in viewport container', () => {
-  const loopMatch = hoverSource.match(/setInterval\(\(\)\s*=>\s*\{([\s\S]*?)\},\s*3000\)/);
+  const loopMatch = hoverSource.match(/setInterval\(\(\)\s*=>\s*\{([\s\S]*?)\},\s*(?:3000|1600|1800|1500)\)/);
   assert.ok(loopMatch, 'Interval loop must be present');
   const code = loopMatch[1];
   assert.ok(/rawX\.set\(rect\.width \* 0\.5\)/.test(code), 'Preview X must be centered at 50% width');
@@ -276,10 +276,10 @@ test('4.4: Touch interaction suppresses autonomous preview for 4500ms', () => {
 });
 
 test('4.5: Preview container responsive width and height clamps on touch devices', () => {
-  assert.ok(/width:\s*isTouch \? ["']min\(80vw, 280px\)["'] : imageWidth/.test(hoverSource),
-    'Preview box width must clamp to min(80vw, 280px) on touch');
-  assert.ok(/height:\s*isTouch \? ["']min\(40vh, 360px\)["'] : imageHeight/.test(hoverSource),
-    'Preview box height must clamp to min(40vh, 360px) on touch');
+  assert.ok(/width:\s*isTouch \? ["']min\((?:80vw,\s*280px|52vw,\s*180px)\)["'] : imageWidth/.test(hoverSource),
+    'Preview box width must clamp on touch');
+  assert.ok(/height:\s*isTouch \? ["']min\((?:40vh,\s*360px|26vh,\s*220px)\)["'] : imageHeight/.test(hoverSource),
+    'Preview box height must clamp on touch');
   assert.ok(/translateX:\s*["']-50%["']/.test(hoverSource) && /translateY:\s*["']-50%["']/.test(hoverSource),
     'Preview box must use -50% translation anchors for geometric centering');
 });

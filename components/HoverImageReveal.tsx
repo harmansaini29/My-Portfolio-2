@@ -7,6 +7,7 @@ import {
   useSpring,
   type Transition as MotionTransition,
 } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface Item {
   text?: string;
@@ -187,9 +188,9 @@ function __OriginkitBase_HoverImageReveal({
     return () => window.removeEventListener("resize", checkTouch);
   }, []);
 
-  // Autonomous gentle cyclic hover preview hint loop for touch / mobile when idle
+  // Autonomous fast cyclic hover preview hint loop for responsive idle showcase
   useEffect(() => {
-    if (!isTouch || count <= 1) return;
+    if (count <= 1) return;
 
     const cycleInterval = setInterval(() => {
       if (userInteractedRef.current) return;
@@ -202,12 +203,12 @@ function __OriginkitBase_HoverImageReveal({
         }
         return next;
       });
-    }, 3000);
+    }, 1600);
 
     return () => {
       clearInterval(cycleInterval);
     };
-  }, [isTouch, count]);
+  }, [count, rawX, rawY]);
 
   const onTouchInteract = (idx?: number) => {
     userInteractedRef.current = true;
@@ -225,17 +226,23 @@ function __OriginkitBase_HoverImageReveal({
   };
 
   const onMove = (e: React.MouseEvent) => {
+    userInteractedRef.current = true;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     rawX.set(e.clientX - rect.left + offsetX);
     rawY.set(e.clientY - rect.top + offsetY);
   };
 
+  const onMouseLeave = () => {
+    userInteractedRef.current = false;
+    setHovered(null);
+  };
+
   return (
     <div
       ref={containerRef}
       onMouseMove={onMove}
-      onMouseLeave={() => setHovered(null)}
+      onMouseLeave={onMouseLeave}
       style={{
         position: "relative",
         width: "100%",
@@ -266,8 +273,12 @@ function __OriginkitBase_HoverImageReveal({
           width: isTouch ? "min(52vw, 180px)" : imageWidth,
           height: isTouch ? "min(26vh, 220px)" : imageHeight,
           borderRadius: isTouch ? Math.min(rounded, 12) : rounded,
-          boxShadow: isTouch ? "0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(6,182,212,0.3)" : undefined,
-          border: isTouch ? "1px solid rgba(255,255,255,0.18)" : undefined,
+          boxShadow: isTouch
+            ? "0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(6,182,212,0.3)"
+            : "0 10px 40px rgba(0,0,0,0.85), 0 0 25px rgba(6,182,212,0.35)",
+          border: isTouch
+            ? "1px solid rgba(255,255,255,0.18)"
+            : "1px solid rgba(6,182,212,0.4)",
           overflow: "hidden",
           pointerEvents: "none",
           zIndex: 2,
@@ -331,6 +342,8 @@ function __OriginkitBase_HoverImageReveal({
           flexDirection: "column",
           alignItems: alignToFlex[align],
           gap: `${rowGap}px`,
+          position: "relative",
+          zIndex: 10,
         }}
       >
         {list.map((item, i) => {
@@ -344,6 +357,9 @@ function __OriginkitBase_HoverImageReveal({
             wordBreak: "break-word",
             maxWidth: "92vw",
             textAlign: alignToText[align],
+            textShadow: isHovered
+              ? "0 0 20px rgba(0, 0, 0, 0.9), 0 2px 10px rgba(0, 0, 0, 0.9)"
+              : undefined,
           };
           const inner = (
             <motion.div
@@ -369,7 +385,10 @@ function __OriginkitBase_HoverImageReveal({
           return (
             <div
               key={i}
-              onMouseEnter={() => setHovered(i)}
+              onMouseEnter={() => {
+                userInteractedRef.current = true;
+                setHovered(i);
+              }}
               onTouchStart={() => onTouchInteract(i)}
               onClick={() => onTouchInteract(i)}
               style={{

@@ -1190,7 +1190,17 @@ function createEngine(mount: HTMLElement, getParams: () => Params, onFocusChange
         poolIdx: number
     } | null = null
 
+    let lastCardW = pp.cardW
+    let lastGap = pp.gap
+    let lastPanelH = pp.panelH
+
     function layout() {
+        if (pp.cardW !== lastCardW || pp.gap !== lastGap || pp.panelH !== lastPanelH) {
+            lastCardW = pp.cardW
+            lastGap = pp.gap
+            lastPanelH = pp.panelH
+            recomputeTotal()
+        }
         panelRects = []
         centeredPanel = null
         let centeredDist = Infinity

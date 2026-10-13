@@ -9,6 +9,16 @@ export default function JourneySection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeCarousel, setActiveCarousel] = useState(-1);
   const [isInteractive, setIsInteractive] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const carouselItems = useMemo(
     () => CAROUSEL_DATA.map((d) => ({ image: d.image })),
@@ -73,9 +83,9 @@ export default function JourneySection() {
             <LiquidGlassCarousel
               items={carouselItems}
               background="transparent"
-              cardWidth={220}
-              cardHeight={295}
-              gap={14}
+              cardWidth={isMobile ? 120 : 220}
+              cardHeight={isMobile ? 165 : 295}
+              gap={isMobile ? 10 : 14}
               onFocusChange={setActiveCarousel}
               entry={{ enabled: false }}
               motion={{

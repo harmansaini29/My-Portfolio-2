@@ -127,6 +127,325 @@ type Legend =
   | { kind: "char"; text: string; bar?: boolean }
   | { kind: "pair"; top: string; bottom: string }
   | { kind: "word"; text: string }
+  | { kind: "icon"; icon: string }
+
+// Tech stack logo symbols
+const TECH_ICONS = [
+  "react", "nextjs", "typescript", "python", "nodejs", "docker",
+  "kubernetes", "aws", "database", "java", "git", "threejs",
+  "redis", "terminal", "cpp", "ai"
+]
+
+function drawTechIcon(
+  g: CanvasRenderingContext2D,
+  icon: string,
+  cx: number,
+  cy: number,
+  size: number,
+  color: string
+) {
+  g.save()
+  g.strokeStyle = color
+  g.fillStyle = color
+  g.lineWidth = Math.max(1.5, size * 0.07)
+  g.lineCap = "round"
+  g.lineJoin = "round"
+
+  switch (icon) {
+    case "react": {
+      const rx = size * 0.44
+      const ry = size * 0.17
+      for (let i = 0; i < 3; i++) {
+        g.save()
+        g.translate(cx, cy)
+        g.rotate((i * Math.PI) / 3)
+        g.beginPath()
+        g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2)
+        g.stroke()
+        g.restore()
+      }
+      g.beginPath()
+      g.arc(cx, cy, size * 0.09, 0, Math.PI * 2)
+      g.fill()
+      break
+    }
+    case "nextjs": {
+      const r = size * 0.42
+      g.beginPath()
+      g.arc(cx, cy, r, 0, Math.PI * 2)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(cx - r * 0.45, cy + r * 0.5)
+      g.lineTo(cx - r * 0.45, cy - r * 0.5)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(cx - r * 0.45, cy - r * 0.5)
+      g.lineTo(cx + r * 0.35, cy + r * 0.48)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(cx + r * 0.35, cy - r * 0.1)
+      g.lineTo(cx + r * 0.35, cy - r * 0.5)
+      g.stroke()
+      break
+    }
+    case "typescript": {
+      const s = size * 0.8
+      roundRectPath(g, cx - s / 2, cy - s / 2, s, s, s * 0.18)
+      g.stroke()
+      g.font = `bold ${Math.round(size * 0.42)}px ui-sans-serif, system-ui, sans-serif`
+      g.textAlign = "center"
+      g.textBaseline = "middle"
+      g.fillText("TS", cx, cy)
+      break
+    }
+    case "python": {
+      const r = size * 0.22
+      g.beginPath()
+      g.arc(cx - r * 0.3, cy - r * 0.4, r, Math.PI * 0.8, Math.PI * 2)
+      g.lineTo(cx + r * 0.7, cy)
+      g.arc(cx + r * 0.3, cy - r * 0.4, r * 0.5, 0, Math.PI)
+      g.stroke()
+      g.beginPath()
+      g.arc(cx - r * 0.3, cy - r * 0.6, size * 0.04, 0, Math.PI * 2)
+      g.fill()
+      g.beginPath()
+      g.arc(cx + r * 0.3, cy + r * 0.4, r, 0, Math.PI * 1.2)
+      g.lineTo(cx - r * 0.7, cy)
+      g.arc(cx - r * 0.3, cy + r * 0.4, r * 0.5, Math.PI, 0)
+      g.stroke()
+      g.beginPath()
+      g.arc(cx + r * 0.3, cy + r * 0.6, size * 0.04, 0, Math.PI * 2)
+      g.fill()
+      break
+    }
+    case "nodejs": {
+      const r = size * 0.42
+      g.beginPath()
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3 - Math.PI / 6
+        const x = cx + r * Math.cos(a)
+        const y = cy + r * Math.sin(a)
+        if (i === 0) g.moveTo(x, y)
+        else g.lineTo(x, y)
+      }
+      g.closePath()
+      g.stroke()
+      g.font = `bold ${Math.round(size * 0.32)}px ui-sans-serif, system-ui, sans-serif`
+      g.textAlign = "center"
+      g.textBaseline = "middle"
+      g.fillText("JS", cx, cy)
+      break
+    }
+    case "docker": {
+      const bs = size * 0.09
+      for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < 3; col++) {
+          const bx = cx - size * 0.28 + col * (bs * 1.3)
+          const by = cy - size * 0.22 + row * (bs * 1.3)
+          g.strokeRect(bx, by, bs, bs)
+        }
+      }
+      g.beginPath()
+      g.moveTo(cx - size * 0.44, cy + size * 0.08)
+      g.bezierCurveTo(
+        cx - size * 0.4, cy + size * 0.38,
+        cx + size * 0.3, cy + size * 0.38,
+        cx + size * 0.42, cy + size * 0.06
+      )
+      g.bezierCurveTo(
+        cx + size * 0.46, cy - size * 0.08,
+        cx + size * 0.36, cy + size * 0.02,
+        cx + size * 0.3, cy + size * 0.08
+      )
+      g.closePath()
+      g.stroke()
+      break
+    }
+    case "kubernetes": {
+      const r = size * 0.38
+      g.beginPath()
+      g.arc(cx, cy, r * 0.35, 0, Math.PI * 2)
+      g.stroke()
+      for (let i = 0; i < 7; i++) {
+        const a = (i * Math.PI * 2) / 7 - Math.PI / 2
+        g.beginPath()
+        g.moveTo(cx + r * 0.35 * Math.cos(a), cy + r * 0.35 * Math.sin(a))
+        g.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a))
+        g.stroke()
+        g.beginPath()
+        g.arc(cx + r * Math.cos(a), cy + r * Math.sin(a), size * 0.05, 0, Math.PI * 2)
+        g.fill()
+      }
+      break
+    }
+    case "aws": {
+      const cw = size * 0.6
+      const ch = size * 0.32
+      g.beginPath()
+      g.arc(cx - cw * 0.22, cy - ch * 0.1, ch * 0.45, Math.PI * 0.8, Math.PI * 1.9)
+      g.arc(cx + cw * 0.05, cy - ch * 0.35, ch * 0.6, Math.PI * 1.2, Math.PI * 2.1)
+      g.arc(cx + cw * 0.28, cy - ch * 0.05, ch * 0.48, Math.PI * 1.4, Math.PI * 0.4)
+      g.lineTo(cx - cw * 0.35, cy + ch * 0.4)
+      g.closePath()
+      g.stroke()
+      g.beginPath()
+      g.arc(cx, cy + size * 0.14, size * 0.24, Math.PI * 0.2, Math.PI * 0.8)
+      g.stroke()
+      break
+    }
+    case "database": {
+      const rx = size * 0.36
+      const ry = size * 0.12
+      g.beginPath()
+      g.ellipse(cx, cy - size * 0.24, rx, ry, 0, 0, Math.PI * 2)
+      g.stroke()
+      g.beginPath()
+      g.ellipse(cx, cy - size * 0.02, rx, ry, 0, 0, Math.PI)
+      g.stroke()
+      g.beginPath()
+      g.ellipse(cx, cy + size * 0.22, rx, ry, 0, 0, Math.PI)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(cx - rx, cy - size * 0.24)
+      g.lineTo(cx - rx, cy + size * 0.22)
+      g.moveTo(cx + rx, cy - size * 0.24)
+      g.lineTo(cx + rx, cy + size * 0.22)
+      g.stroke()
+      break
+    }
+    case "java": {
+      const cw = size * 0.3
+      g.beginPath()
+      g.arc(cx - size * 0.04, cy + size * 0.08, cw, 0, Math.PI)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(cx - size * 0.04 - cw, cy + size * 0.08)
+      g.lineTo(cx - size * 0.04 + cw, cy + size * 0.08)
+      g.stroke()
+      g.beginPath()
+      g.arc(cx + size * 0.28, cy + size * 0.14, size * 0.11, -Math.PI * 0.6, Math.PI * 0.6)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(cx - size * 0.12, cy - size * 0.02)
+      g.bezierCurveTo(cx - size * 0.06, cy - size * 0.14, cx - size * 0.18, cy - size * 0.26, cx - size * 0.1, cy - size * 0.38)
+      g.moveTo(cx + size * 0.06, cy - size * 0.02)
+      g.bezierCurveTo(cx + size * 0.12, cy - size * 0.14, cx, cy - size * 0.26, cx + size * 0.08, cy - size * 0.38)
+      g.stroke()
+      break
+    }
+    case "git": {
+      g.save()
+      g.translate(cx, cy)
+      g.rotate(-Math.PI / 4)
+      const r = size * 0.09
+      g.beginPath()
+      g.moveTo(0, -size * 0.3)
+      g.lineTo(0, size * 0.3)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(0, 0)
+      g.bezierCurveTo(size * 0.18, 0, size * 0.26, size * 0.1, size * 0.26, size * 0.22)
+      g.stroke()
+      g.beginPath(); g.arc(0, -size * 0.3, r, 0, Math.PI * 2); g.fill()
+      g.beginPath(); g.arc(0, size * 0.3, r, 0, Math.PI * 2); g.fill()
+      g.beginPath(); g.arc(size * 0.26, size * 0.22, r, 0, Math.PI * 2); g.fill()
+      g.restore()
+      break
+    }
+    case "threejs": {
+      const r = size * 0.42
+      const p1 = { x: cx, y: cy - r }
+      const p2 = { x: cx - r * 0.86, y: cy + r * 0.65 }
+      const p3 = { x: cx + r * 0.86, y: cy + r * 0.65 }
+      const pc = { x: cx, y: cy + r * 0.15 }
+      g.beginPath()
+      g.moveTo(p1.x, p1.y); g.lineTo(p2.x, p2.y); g.lineTo(p3.x, p3.y); g.closePath()
+      g.stroke()
+      g.beginPath()
+      g.moveTo(pc.x, pc.y); g.lineTo(p1.x, p1.y)
+      g.moveTo(pc.x, pc.y); g.lineTo(p2.x, p2.y)
+      g.moveTo(pc.x, pc.y); g.lineTo(p3.x, p3.y)
+      g.stroke()
+      break
+    }
+    case "redis": {
+      const rx = size * 0.36
+      const ry = size * 0.14
+      for (let i = 0; i < 3; i++) {
+        const yOff = cy - size * 0.22 + i * size * 0.2
+        g.beginPath()
+        g.moveTo(cx, yOff - ry)
+        g.lineTo(cx + rx, yOff)
+        g.lineTo(cx, yOff + ry)
+        g.lineTo(cx - rx, yOff)
+        g.closePath()
+        g.stroke()
+      }
+      break
+    }
+    case "terminal": {
+      const w = size * 0.8
+      const h = size * 0.58
+      roundRectPath(g, cx - w / 2, cy - h / 2, w, h, size * 0.1)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(cx - w / 2, cy - h * 0.18)
+      g.lineTo(cx + w / 2, cy - h * 0.18)
+      g.stroke()
+      g.beginPath()
+      g.arc(cx - w * 0.32, cy - h * 0.32, size * 0.035, 0, Math.PI * 2)
+      g.fill()
+      g.beginPath()
+      g.moveTo(cx - w * 0.28, cy)
+      g.lineTo(cx - w * 0.12, cy + h * 0.14)
+      g.lineTo(cx - w * 0.28, cy + h * 0.28)
+      g.stroke()
+      g.beginPath()
+      g.moveTo(cx - w * 0.04, cy + h * 0.28)
+      g.lineTo(cx + w * 0.18, cy + h * 0.28)
+      g.stroke()
+      break
+    }
+    case "cpp": {
+      g.font = `bold ${Math.round(size * 0.44)}px ui-sans-serif, system-ui, sans-serif`
+      g.textAlign = "center"
+      g.textBaseline = "middle"
+      g.fillText("C++", cx, cy)
+      break
+    }
+    case "ai": {
+      const r = size * 0.07
+      const inX = cx - size * 0.32
+      const hidX = cx
+      const outX = cx + size * 0.32
+      const inY = [cy - size * 0.26, cy, cy + size * 0.26]
+      const hidY = [cy - size * 0.16, cy + size * 0.16]
+      const outY = [cy]
+
+      inY.forEach((y1) => {
+        hidY.forEach((y2) => {
+          g.beginPath(); g.moveTo(inX, y1); g.lineTo(hidX, y2); g.stroke()
+        })
+      })
+      hidY.forEach((y1) => {
+        outY.forEach((y2) => {
+          g.beginPath(); g.moveTo(hidX, y1); g.lineTo(outX, y2); g.stroke()
+        })
+      })
+      inY.forEach((y) => { g.beginPath(); g.arc(inX, y, r, 0, Math.PI * 2); g.fill() })
+      hidY.forEach((y) => { g.beginPath(); g.arc(hidX, y, r, 0, Math.PI * 2); g.fill() })
+      outY.forEach((y) => { g.beginPath(); g.arc(outX, y, r, 0, Math.PI * 2); g.fill() })
+      break
+    }
+    default: {
+      g.font = `bold ${Math.round(size * 0.4)}px ui-sans-serif, system-ui, sans-serif`
+      g.textAlign = "center"
+      g.textBaseline = "middle"
+      g.fillText(icon.toUpperCase(), cx, cy)
+    }
+  }
+  g.restore()
+}
 
 // 1. Pure Developer Code Syntax & Operator Symbols
 const SYNTAX_SYMBOLS = [
@@ -178,26 +497,32 @@ const TALL_SYMBOLS = [
   "SQL", "GIT", "K8S", "AWS", "C++", "TS", "PY", "GO", "RS", "AI"
 ]
 
+const ICON_LEGENDS: Legend[] = TECH_ICONS.map((icon) => ({ kind: "icon", icon } as Legend))
+
 const LEGENDS: Legend[] = [
+  ...ICON_LEGENDS,
   ...ALL_SYMBOLS.map((text) => ({ kind: "char", text }) as Legend),
   ...HOMING_SYMBOLS.map((text) => ({ kind: "char", text, bar: true }) as Legend),
   ...SYMBOL_PAIRS.map(([top, bottom]) => ({ kind: "pair", top, bottom }) as Legend),
   ...TALL_SYMBOLS.map((text) => ({ kind: "word", text }) as Legend),
 ]
-const I_SYMBOLS = 0
-const I_HOMING = ALL_SYMBOLS.length
+const I_ICONS = 0
+const I_SYMBOLS = ICON_LEGENDS.length
+const I_HOMING = I_SYMBOLS + ALL_SYMBOLS.length
 const I_PAIRS = I_HOMING + HOMING_SYMBOLS.length
 const I_TALL = I_PAIRS + SYMBOL_PAIRS.length
 const N_LEGENDS = LEGENDS.length
 
 function pickLegend(r: number, rnd: () => number): number {
-  if (r < 0.60) return I_SYMBOLS + Math.floor(rnd() * ALL_SYMBOLS.length)
-  if (r < 0.72) return I_HOMING + Math.floor(rnd() * HOMING_SYMBOLS.length)
-  if (r < 0.88) return I_PAIRS + Math.floor(rnd() * SYMBOL_PAIRS.length)
+  if (r < 0.42) return I_ICONS + Math.floor(rnd() * ICON_LEGENDS.length)
+  if (r < 0.68) return I_SYMBOLS + Math.floor(rnd() * ALL_SYMBOLS.length)
+  if (r < 0.80) return I_HOMING + Math.floor(rnd() * HOMING_SYMBOLS.length)
+  if (r < 0.90) return I_PAIRS + Math.floor(rnd() * SYMBOL_PAIRS.length)
   return I_TALL + Math.floor(rnd() * TALL_SYMBOLS.length)
 }
 
 function pickTallLegend(rnd: () => number): number {
+  if (rnd() < 0.5) return I_ICONS + Math.floor(rnd() * ICON_LEGENDS.length)
   return I_TALL + Math.floor(rnd() * TALL_SYMBOLS.length)
 }
 
@@ -370,7 +695,9 @@ function bakeLegend(
 
   const maxW = w * 0.74
 
-  if (leg.kind === "word") {
+  if (leg.kind === "icon") {
+    drawTechIcon(g, leg.icon, cx, cy, fs * 0.95, css(color))
+  } else if (leg.kind === "word") {
     let s = WORD_RATIO * fs
     g.font = fontShorthand(font, s)
     const metrics = g.measureText(leg.text)
@@ -670,7 +997,14 @@ export default function KeycapWall(props: KeycapWallProps) {
       })
     }
 
+    let isVisible = false
+    let io: IntersectionObserver | null = null
+
     const render = (now: number) => {
+      if (!isVisible) {
+        raf = 0
+        return
+      }
       const dt = last === 0 ? 0 : Math.min(0.05, (now - last) / 1000)
       last = now
       const live = liveRef.current
@@ -860,7 +1194,24 @@ export default function KeycapWall(props: KeycapWallProps) {
 
       raf = requestAnimationFrame(render)
     }
-    raf = requestAnimationFrame(render)
+
+    if (typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          const was = isVisible
+          isVisible = entry.isIntersecting
+          if (!was && isVisible) {
+            last = performance.now()
+            if (!raf) raf = requestAnimationFrame(render)
+          }
+        },
+        { threshold: 0.01 }
+      )
+      io.observe(root)
+    } else {
+      isVisible = true
+      raf = requestAnimationFrame(render)
+    }
 
     const onMove = (e: PointerEvent) => {
       pointer.tx = e.offsetX
@@ -892,7 +1243,8 @@ export default function KeycapWall(props: KeycapWallProps) {
     root.addEventListener("pointerdown", onDown)
 
     return () => {
-      cancelAnimationFrame(raf)
+      if (raf) cancelAnimationFrame(raf)
+      if (io) io.disconnect()
       ro.disconnect()
       root.removeEventListener("pointermove", onMove)
       root.removeEventListener("pointerleave", onLeave)
@@ -911,10 +1263,6 @@ export default function KeycapWall(props: KeycapWallProps) {
         width: typeof width === "number" && width > 0 ? width : "100%",
         minHeight: 520,
         height: typeof height === "number" && height > 0 ? height : "min(88vh, 760px)",
-        maskImage:
-          "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 6%, rgba(0,0,0,0.85) 14%, black 22%, black 78%, rgba(0,0,0,0.85) 86%, rgba(0,0,0,0.4) 94%, transparent 100%)",
-        WebkitMaskImage:
-          "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 6%, rgba(0,0,0,0.85) 14%, black 22%, black 78%, rgba(0,0,0,0.85) 86%, rgba(0,0,0,0.4) 94%, transparent 100%)",
         ...style,
       }}
     >
