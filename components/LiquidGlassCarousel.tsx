@@ -557,10 +557,10 @@ function makeParams(p: LiquidGlassCarouselProps) {
 
     return {
         itemOffsets: (p.items ?? []).filter(Boolean).map(offsetOf),
-        panelH: clamp(p.cardHeight ?? p.panelHeight ?? 450, 60, 1200),
-        cardW: clamp(p.cardWidth ?? 340, 40, 1600),
+        panelH: clamp(p.cardHeight ?? p.panelHeight ?? 295, 60, 1200),
+        cardW: clamp(p.cardWidth ?? 220, 40, 1600),
         sizeMode: SIZE_MODES[p.sizeMode ?? "same"] ? p.sizeMode ?? "same" : "same",
-        gap: clamp(p.gap ?? 12, 0, 200),
+        gap: clamp(p.gap ?? 14, 0, 200),
         shrinkMax: 0.25,
         shrinkSpeed: 60,
         shrinkAttack: 0.25,

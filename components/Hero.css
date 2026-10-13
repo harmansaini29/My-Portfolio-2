@@ -133,6 +133,10 @@
   top: max(1.75rem, env(safe-area-inset-top, 1.75rem));
   right: max(1.75rem, env(safe-area-inset-right, 1.75rem));
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .swapBtnIcon {
@@ -179,6 +183,69 @@
 
 .swapBtnIcon.spinning svg {
   transform: rotate(360deg);
+}
+
+.tourBtnIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.28);
+  background: rgba(20,20,26,.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+}
+
+.tourBtnIcon:hover {
+  background: rgba(40,40,52,.85);
+  border-color: rgba(6,182,212,.7);
+  color: #22d3ee;
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(6,182,212,.35);
+}
+
+.tourBtnIcon:active {
+  transform: scale(.92);
+}
+
+.tourBtnIcon:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 3px;
+}
+
+.tourBtnIcon.is-touring {
+  background: rgba(6,182,212,.2);
+  border-color: #22d3ee;
+  color: #22d3ee;
+  box-shadow: 0 0 24px rgba(6,182,212,.55);
+  animation: tourPulse 2s infinite ease-in-out;
+}
+
+@keyframes tourPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 16px rgba(6,182,212,.4);
+  }
+  50% {
+    transform: scale(1.07);
+    box-shadow: 0 0 28px rgba(6,182,212,.7);
+  }
+}
+
+@media (max-width: 640px) {
+  .swapBtnIcon, .tourBtnIcon {
+    width: 44px;
+    height: 44px;
+  }
+  .top-right-controls {
+    gap: 8px;
+  }
 }
 
 @keyframes pulseAura {

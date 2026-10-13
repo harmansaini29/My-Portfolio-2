@@ -44,8 +44,8 @@ export default function ProjectsSection() {
             size={100}
             rows={8}
             autoCover={true}
-            speed={10}
-            stagger={1.5}
+            speed={4.2}
+            stagger={3.2}
             onSlideChange={setActiveProject}
           />
 

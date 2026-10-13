@@ -85,6 +85,9 @@ function clamp(value: number, min: number, max: number): number {
 const easeInOutQuart = (t: number): number =>
     t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2
 
+const easeInOutCubic = (t: number): number =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
 const easeInOutSine = (t: number): number => -(Math.cos(Math.PI * t) - 1) / 2
 
 const randomBetween = (min: number, max: number): number =>
@@ -322,7 +325,7 @@ function __OriginkitBase_MosaicFlip({
         [reel, sheetWidth, sheetHeight, urlKey, measured]
     )
 
-    const flipDuration = clamp(1.2 - clamp(speed, 0, 10) * 0.1, 0.2, 1.2)
+    const flipDuration = clamp(1.8 - clamp(speed, 0, 10) * 0.12, 0.4, 2.2)
     const staggerSpan = clamp(stagger, 0, 10) * 0.12
 
     const amplitude = clamp(float, 0, 10) * 0.13 * tile
@@ -485,7 +488,7 @@ function __OriginkitBase_MosaicFlip({
                     if (progress < 1) settled = false
                     rotation =
                         flip.from +
-                        (flip.to - flip.from) * easeInOutQuart(progress)
+                        (flip.to - flip.from) * easeInOutCubic(progress)
                 }
 
                 const node = tileRefs.current[i]

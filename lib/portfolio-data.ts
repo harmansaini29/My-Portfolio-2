@@ -65,6 +65,11 @@ export const PORTFOLIO_MEDIA = {
       url: '/images/base.png',
       alt: 'Harman Saini Portrait Base Layer',
     },
+    portrait: {
+      type: 'image' as const,
+      url: '/images/portrait.png',
+      alt: 'Harman Saini Main Portrait Layer',
+    },
     chrome: {
       type: 'image' as const,
       url: '/images/chrome.png',

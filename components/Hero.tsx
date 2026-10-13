@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import DiceRoleFlipper from './DiceRoleFlipper';
 import './Hero.css';
 
@@ -25,7 +25,7 @@ export default function Hero({
   portraitSrc = '/images/portrait.png',
   chromeSrc = '/images/chrome.png',
   name = 'Harman Saini',
-  hint = 'Move cursor to reveal'
+  hint = 'Move cursor to reveal',
 }: HeroProps) {
   const heroRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -37,6 +37,96 @@ export default function Hero({
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [spinning, setSpinning] = useState(false);
+  const [portraitLoaded, setPortraitLoaded] = useState(false);
+  const [isTouring, setIsTouring] = useState(false);
+  const tourTimeoutsRef = useRef<number[]>([]);
+
+  // Check initial load state of portrait
+  useEffect(() => {
+    const img = new Image();
+    img.src = portraitSrc;
+    if (img.complete) {
+      setPortraitLoaded(true);
+    } else {
+      img.onload = () => setPortraitLoaded(true);
+    }
+  }, [portraitSrc]);
+
+  const stopTour = useCallback(() => {
+    tourTimeoutsRef.current.forEach((t) => clearTimeout(t));
+    tourTimeoutsRef.current = [];
+    setIsTouring(false);
+  }, []);
+
+  const startTour = useCallback(() => {
+    stopTour();
+    setIsTouring(true);
+
+    const steps = [
+      { id: '#hero', duration: 1.8, delay: 2200 },
+      { id: '#vortex-journey', duration: 2.2, delay: 4200 },
+      { id: '#techstack-section', duration: 1.8, delay: 3800 },
+      { id: '#projects-section', duration: 1.8, delay: 4200 },
+      { id: '#achievements-section', duration: 1.8, delay: 3600 },
+      { id: '#contact-section', duration: 1.8, delay: 3800 },
+      { id: '#hero', duration: 2.2, delay: 1000 },
+    ];
+
+    const lenis = (window as any).__lenis;
+    let accumulatedDelay = 0;
+
+    steps.forEach((step, index) => {
+      const timer = window.setTimeout(() => {
+        const targetEl = document.querySelector(step.id);
+        if (targetEl) {
+          if (lenis && typeof lenis.scrollTo === 'function') {
+            lenis.scrollTo(targetEl, { duration: step.duration, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+          } else {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+        if (index === steps.length - 1) {
+          const finalTimer = window.setTimeout(() => {
+            setIsTouring(false);
+          }, step.delay);
+          tourTimeoutsRef.current.push(finalTimer);
+        }
+      }, accumulatedDelay);
+
+      tourTimeoutsRef.current.push(timer);
+      accumulatedDelay += step.delay;
+    });
+  }, [stopTour]);
+
+  const toggleTour = () => {
+    if (isTouring) {
+      stopTour();
+    } else {
+      startTour();
+    }
+  };
+
+  // Cancel tour if user manually interacts with wheel or touch
+  useEffect(() => {
+    if (!isTouring) return;
+    const handleManualScroll = (e: Event) => {
+      if (e.isTrusted) {
+        stopTour();
+      }
+    };
+    window.addEventListener('wheel', handleManualScroll, { passive: true });
+    window.addEventListener('touchstart', handleManualScroll, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', handleManualScroll);
+      window.removeEventListener('touchstart', handleManualScroll);
+    };
+  }, [isTouring, stopTour]);
+
+  useEffect(() => {
+    return () => {
+      stopTour();
+    };
+  }, [stopTour]);
 
   const handleSwap = () => {
     setActiveIdx((prev) => (prev === 0 ? 1 : 0));
@@ -215,6 +305,13 @@ export default function Hero({
           draggable={false}
           data-fit="cover"
           data-position="top"
+          loading="lazy"
+          fetchPriority="low"
+          decoding="async"
+          style={{
+            opacity: portraitLoaded ? 1 : 0,
+            transition: 'opacity 0.6s ease',
+          }}
         />
         
         <div className="layerBase" id="imgTop" ref={imgTopRef}>
@@ -227,6 +324,10 @@ export default function Hero({
             draggable={false}
             data-fit="cover"
             data-position="top"
+            loading="eager"
+            fetchPriority="high"
+            decoding="sync"
+            onLoad={() => setPortraitLoaded(true)}
           />
           <img
             className={activeIdx === 1 ? "isActive" : ""}
@@ -262,6 +363,7 @@ export default function Hero({
           type="button" 
           onClick={handleSwap} 
           aria-label="Swap between the two portraits"
+          title="Swap portrait appearance"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="17 1 21 5 17 9"/>
@@ -270,7 +372,42 @@ export default function Hero({
             <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
           </svg>
         </button>
+
+        <button
+          className={`tourBtnIcon ${isTouring ? 'is-touring' : ''}`}
+          id="tour-btn"
+          type="button"
+          onClick={toggleTour}
+          aria-label="Automatic portfolio walkthrough tour"
+          title={isTouring ? "Pause Portfolio Tour" : "Start Auto Video Tour"}
+        >
+          {isTouring ? (
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <rect x="6" y="5" width="4" height="14" rx="1.5" />
+              <rect x="14" y="5" width="4" height="14" rx="1.5" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style={{ marginLeft: '2px' }}>
+              <polygon points="6 4 20 12 6 20 6 4" />
+            </svg>
+          )}
+        </button>
       </div>
+
+      {isTouring && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2 rounded-full bg-black/85 border border-cyan-500/50 backdrop-blur-xl shadow-[0_0_30px_rgba(6,182,212,0.4)] pointer-events-auto transition-all animate-fade-in">
+          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+          <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-cyan-300 uppercase">
+            Auto Portfolio Tour Active
+          </span>
+          <button
+            onClick={stopTour}
+            className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+          >
+            Exit Tour [✕]
+          </button>
+        </div>
+      )}
 
       <div className="bottom-left-section" id="bottomLeft" ref={bottomLeftRef}>
         <div className="greeting-row">

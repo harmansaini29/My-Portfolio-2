@@ -24,6 +24,7 @@ export default function Home() {
         {/* 1. Hero */}
         <Hero
           baseSrc={HERO_MEDIA.base.url}
+          portraitSrc={HERO_MEDIA.portrait.url}
           chromeSrc={HERO_MEDIA.chrome.url}
           name="Harman Saini"
           hint="Move cursor to reveal"
@@ -31,7 +32,7 @@ export default function Home() {
 
         {/* 2. Vortex About & 3. Journey Section - Grid Overlap for Seamless Dissolve */}
         {/* Stacking hierarchy: Journey at z-20, VortexAbout at z-10 */}
-        <div className="grid grid-cols-1 grid-rows-1 w-full">
+        <div id="vortex-journey" className="grid grid-cols-1 grid-rows-1 w-full">
           <div className="col-start-1 row-start-1 w-full relative z-10">
             <VortexAbout />
           </div>
@@ -41,20 +42,28 @@ export default function Home() {
         </div>
 
         {/* 4. Techstack */}
-        <StickySection>
-          <TechStackSection />
-        </StickySection>
+        <div id="techstack-section">
+          <StickySection>
+            <TechStackSection />
+          </StickySection>
+        </div>
 
         {/* 5. Projects */}
-        <StickySection>
-          <ProjectsSection />
-        </StickySection>
+        <div id="projects-section">
+          <StickySection>
+            <ProjectsSection />
+          </StickySection>
+        </div>
 
         {/* 6. Achievements */}
-        <AchievementsSection />
+        <div id="achievements-section">
+          <AchievementsSection />
+        </div>
 
         {/* 7. Contact Us */}
-        <ContactSection />
+        <div id="contact-section">
+          <ContactSection />
+        </div>
       </div>
     </main>
   );

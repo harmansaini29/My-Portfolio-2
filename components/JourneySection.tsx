@@ -67,12 +67,15 @@ export default function JourneySection() {
           </h2>
 
           <div
-            className="w-full h-[70vh] relative z-20 pointer-events-auto"
+            className="w-full h-[65vh] relative z-20 pointer-events-auto"
             style={{ pointerEvents: isInteractive ? 'auto' : 'none' }}
           >
             <LiquidGlassCarousel
               items={carouselItems}
               background="transparent"
+              cardWidth={220}
+              cardHeight={295}
+              gap={14}
               onFocusChange={setActiveCarousel}
               entry={{ enabled: false }}
               motion={{

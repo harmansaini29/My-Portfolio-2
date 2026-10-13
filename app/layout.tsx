@@ -38,6 +38,9 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("dark", "bg-black", "text-white", "antialiased", jakarta.variable, "font-sans", geist.variable)}
     >
+      <head>
+        <link rel="preload" as="image" href="/images/portrait.png" fetchPriority="high" />
+      </head>
       <body className="min-h-screen bg-black overflow-x-hidden" suppressHydrationWarning>
         <SmoothScroll>
           {children}
